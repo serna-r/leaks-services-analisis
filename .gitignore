@@ -1,9 +1,5 @@
-# Ignorar los datos personales de la brecha y las estadísticas procesadas
-# Ignorar la carpeta 'data' y todo su contenido
-data/
+# Ignora todas las subcarpetas
+*/
 
-# Ignorar archivos específicos
-source.txt
-statsexcel.xlsx
-linkedin.txt_Pieces.zip
-datos_extraidos.csv
+# No ignores archivos en la raíz del proyecto
+!/*
