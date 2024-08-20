@@ -1,6 +1,9 @@
 # Ignorar cualquier carpeta llamada 'data'
 data/
 
+# Ignorar pycache
+pycache/
+
 # Ignorar todos los archivos .txt
 *.txt
 
