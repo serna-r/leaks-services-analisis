@@ -1,5 +1,23 @@
-# Ignora todas las subcarpetas
-*/
+# Ignorar cualquier carpeta llamada 'data'
+data/
 
-# No ignores archivos en la raíz del proyecto
-!/*
+# Ignorar todos los archivos .txt
+*.txt
+
+# No ignorar 'stats.txt'
+!stats.txt
+
+# Ignorar todos los archivos de Excel
+*.xlsx
+
+# Ignorar archivos source
+source
+
+# Ignorar archivos ZIP
+*.zip
+
+# Ignorar archivos CSV
+*.csv
+
+# Asegúrate de que no se ignore el archivo .gitignore en sí
+!.gitignore
