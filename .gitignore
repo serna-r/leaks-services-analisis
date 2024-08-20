@@ -2,7 +2,7 @@
 data/
 
 # Ignorar pycache
-pycache/
+__pycache__/
 
 # Ignorar todos los archivos .txt
 *.txt
