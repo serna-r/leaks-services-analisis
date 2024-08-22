@@ -16,8 +16,10 @@ def leer_archivos_en_carpeta(carpeta):
             for linea in file:
                 correo, contraseña = separar_correo_y_contrasena(linea)
                 if correo is not None and contraseña is not None:
-                    datos.append([correo, contraseña])
-                    if verbose > 0 and (contraseña == 'NULL' or contraseña == 'none' or contraseña == None): print(linea)
+                    # Check also for unknoun or null passwords
+                    if not (contraseña == 'NULL' or contraseña == 'none' or contraseña == '?'
+                            or contraseña == 'None'):
+                        datos.append([correo, contraseña])
                     if verbose > 1: print(f"correo: {correo} contraseña: {contraseña}")
 
     # Crear un DataFrame de pandas con todos los datos recopilados
