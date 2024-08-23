@@ -1,10 +1,36 @@
 import pandas as pd
 import math
 
-i = 0
+verbose = 0
+top_100_passwords = []
+
+# Function to optimize password processing
+def apply_all_in_one(password):
+    mask, total = password_mask(password)
+    entropy = calculate_entropy(password)
+    length = len(password)
+    load_top_100(file_path='top100.txt')
+    common = is_common_password(password)
+
+    return mask, total, entropy, length, common
+
+def load_top_100(file_path):
+    with open(file_path, 'r') as file:
+        # Read all lines from the file, excluding the first line
+        lines = file.readlines()[1:]  # Skip the first line
+        
+        # Limit the list to the top 100 passwords
+        global top_100_passwords
+        top_100_passwords = [line.strip() for line in lines[:100]]
+    
+    return top_100_passwords
+
+def is_common_password(password):
+    # Check if the password is in the list of the top 100
+    return password in top_100_passwords
 
 # Function to analyze password complexity
-def pasword_mask(password):
+def password_mask(password):
     mask = ''
     if any(c.islower() for c in password): mask = mask + 'l'
     if any(c.isupper() for c in password): mask = mask + 'u'
@@ -17,75 +43,73 @@ def pasword_mask(password):
 
     return mask, total
 
-# Calcular entropia formula E = L × log(R) / log(2)
-def calcular_entropia(palabra):
-    longitud_palabra = len(palabra)
-    simbolos_posibles = len(set(palabra))
+# Calculate entropy using the formula E = L × log(R) / log(2)
+def calculate_entropy(word):
+    word_length = len(word)
+    possible_symbols = len(set(word))
     
-    if simbolos_posibles > 1:  # Para evitar log(1) o log(0)
-        entropia = longitud_palabra * (math.log(simbolos_posibles) / math.log(2))
+    if possible_symbols > 1:  # To avoid log(1) or log(0)
+        entropy = word_length * (math.log(possible_symbols) / math.log(2))
     else:
-        entropia = 0  # Si hay un solo símbolo, la entropía es 0
+        entropy = 0  # If there is only one symbol, entropy is 0
     
-    return entropia
-
-
+    return entropy
 
 def statistics(df, output):
-    # Mostrar las primeras filas para asegurarse de que se cargó correctamente
-    print(df.head())
+    # Show the first rows to ensure it loaded correctly
+    if verbose > 0: print(df.head())
 
-    # Generar un informe estadístico de las contraseñas
-    # Contar las contraseñas más comunes
-    common_passwords = df['Contraseña'].value_counts()
+    # Generate a statistical report of the passwords
+    # Count the most common passwords
+    common_passwords = df['Password'].value_counts()
 
-    # print("\nInforme estadístico de contraseñas más comunes:")
-    print(common_passwords[:20])
+    # print("\nStatistical report of most common passwords:")
+    if verbose > 0: print('common passwords:\n', common_passwords[:20])
 
-    # Crear una nueva columna 'longitud' que contiene la longitud de cada contraseña
-    df['Longitud'] = df['Contraseña'].str.len()
+    # Generate a statistical report of the passwords
 
-    # Contar la frecuencia de cada longitud de contraseña
-    lengthcount = df['Longitud'].value_counts().sort_index()
+    # Apply all the functions to each password and add to the dataframe
+    df['mask'], df['total'], df['entropy'], df['length'], df['common'] = zip(*df['Password'].map(apply_all_in_one))
 
-    # Mostrar el resultado
-    print(lengthcount)
+    if verbose >= 0: print('Applyed functions, now processing')
 
-    # Apply the function to each password and create a new DataFrame
-    df['mask'], df['total'] = zip(*df['Contraseña'].map(pasword_mask))
+    # Count the frequency of each password length
+    length_count = df['length'].value_counts().sort_index()
+    # Show the result
+    if verbose > 0: print(length_count)
+
     # Group by Character Length (for 6, 7, 8, 9, 10) and 'other' for longer or shorter passwords
     bins = [0, 6, 7, 8, 9, 10, float('inf')]
     labels = ['6', '7', '8', '9', '10', 'other']
-    df['Length Group'] = pd.cut(df['Longitud'], bins=bins, labels=labels, right=False)
-    print(df)
-
+    df['Length Group'] = pd.cut(df['length'], bins=bins, labels=labels, right=False)
+    # Print to check
+    if verbose > 1: print(df)
     # Aggregate the data
     table = df.groupby('Length Group', observed=True)['mask'].value_counts().unstack(level=1)
     table['total'] = df.groupby('Length Group', observed=True)['total'].sum()
-    table = table.div(table['total'], axis = 0).mul(100, axis=0)
+    table = table.div(table['total'], axis=0).mul(100, axis=0)
     table = table.reindex(sorted(table.columns), axis=1)
-    print(table)
+    if verbose > 0: print(table)
 
-    # Aplicar la función de entropía a cada fila en la columna 'contraseña'
-    df['entropia'] = df['Contraseña'].apply(calcular_entropia)
+    # Group the entropy values into 20 intervals
+    intervals = pd.cut(df['entropy'], bins=20)
+    # Count how many passwords are in each interval
+    interval_count = df.groupby(intervals, observed=True)['Password'].count()
+    # Show the table with the results
+    if verbose > 0: print(interval_count)
 
-    # Agrupar los valores de entropía en 20 intervalos
-    intervalos = pd.cut(df['entropia'], bins=20)
+    if verbose > 0: print('Password is common: ', df.groupby('common', observed=True).size().reset_index(name='count'))
 
-    # Contar cuántas contraseñas hay en cada intervalo
-    conteo_intervalos = df.groupby(intervalos)['Contraseña'].count()
+    if verbose >= 0: print('\nData processed columns created: ', df.columns.values)
 
-    # Mostrar la tabla con los resultados
-    print(conteo_intervalos)
-  
-    # Abrir fichero de output
+    # Open output file
     f = open(output, 'w')
-    # Escribir datos
-    f.write(f'Total users read {len(df.index)} \n20 most common passwords \n{common_passwords[:20]} \nLength: \n{lengthcount} \ntable \n{table.to_string()} \n{conteo_intervalos.to_string()}')
+    # Write data
+    f.write(f"Total users read {len(df.index)} \n20 most common passwords \n{common_passwords[:20]} \nLength: \n{length_count} \ntable \n{table.to_string()} \n{interval_count.to_string()}\n Password is common:\n{df.groupby('common', observed=True).size().reset_index(name='count')}")
 
 if __name__ == '__main__':
-    # Cargar el archivo CSV en un DataFrame
-    df = pd.read_csv('datos_extraidos.csv')
+    # Load the CSV file into a DataFrame
+    df = pd.read_csv('extracted_data.csv')
     output = 'Stats.txt'
 
     statistics(df, output)

@@ -1,38 +1,62 @@
 import os
-from dataextract import leer_archivos_en_carpeta
+import time  # Import the time module
+from dataextract import read_files_in_folder
 from dataanalisis import statistics
 
+verbose = 0
+
 def main():
-    # Solicitar el nombre del data leak
-    data_leak_name = input("Introduce el nombre del data leak que quieres analizar: ")
+    # Read the leak names from a text file
+    with open("leaks.txt", "r") as file:
+        leak_names = file.read().splitlines()
 
-    # Definir la ruta del directorio basado en el nombre proporcionado
-    data_leak_dir = os.path.join(os.getcwd(), data_leak_name)
+    for data_leak_name in leak_names:
+        if not data_leak_name.strip():
+            continue  # Skip empty lines
 
-    # Verificar si el directorio existe
-    if not os.path.isdir(data_leak_dir):
-        print(f"El directorio '{data_leak_name}' no existe en la ruta actual.")
-        return
+        print(f"\nProcessing data leak: {data_leak_name}")
 
-    # Ejecutar la extracción de datos
-    print("\nEjecutando extracción de datos...")
-    data_folder = os.path.join(data_leak_dir, 'data')
-    df = leer_archivos_en_carpeta(data_folder)
+        # Define the directory path based on the provided name
+        data_leak_dir = os.path.join(os.getcwd(), data_leak_name)
 
-    if df is None or df.empty:
-        print("No se encontraron datos válidos durante la extracción.")
-        return
+        # Check if the directory exists
+        if not os.path.isdir(data_leak_dir):
+            print(f"The directory '{data_leak_name}' does not exist in the current path.")
+            continue
 
-    # Mostrar los datos extraídos (opcional)
-    print("\nDatos extraídos:")
-    print(df)
+        # Execute data extraction
+        print("\nExecuting data extraction...")
+        start_extract_time = time.time()  # Start time of extraction
+        data_folder = os.path.join(data_leak_dir, 'data')
+        df = read_files_in_folder(data_folder)
+        end_extract_time = time.time()  # End time of extraction
 
-    # Ejecutar el análisis de datos
-    print("\nEjecutando análisis de datos...")
-    output_file = os.path.join(data_leak_dir, 'Stats.txt')
-    statistics(df, output_file)
+        if df is None or df.empty:
+            print("No valid data found during extraction.")
+            continue
 
-    print(f"\nAnálisis completado con éxito. Revisa el archivo '{output_file}' para los resultados.")
+        # Calculate elapsed time for extraction
+        time_elapsed_extract = end_extract_time - start_extract_time
+        print(f"Elapsed time for data extraction: {time_elapsed_extract:.2f} seconds.")
+
+        # Optionally display the extracted data
+        if verbose >= 0:
+            print("\nExtracted data:", len(df.index), ' passwords')
+        if verbose > 0:
+            print(df)
+
+        # Execute data analysis
+        print("\nExecuting data analysis...")
+        start_analysis_time = time.time()  # Start time of analysis
+        output_file = os.path.join(data_leak_dir, 'Stats.txt')
+        statistics(df, output_file)
+        end_analysis_time = time.time()  # End time of analysis
+
+        # Calculate elapsed time for analysis
+        time_elapsed_analysis = end_analysis_time - start_analysis_time
+        print(f"Elapsed time for data analysis: {time_elapsed_analysis:.2f} seconds.")
+
+        print(f"\nAnalysis completed successfully. Check the file '{output_file}' for results.")
 
 if __name__ == "__main__":
     main()

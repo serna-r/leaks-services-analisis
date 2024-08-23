@@ -3,83 +3,83 @@ import pandas as pd
 import re
 
 verbose = 0
-def leer_archivos_en_carpeta(carpeta):
-    archivos = os.listdir(carpeta)
-    datos = []
 
-    for archivo in archivos:
-        ruta_archivo = os.path.join(carpeta, archivo)
+def read_files_in_folder(folder):
+    files = os.listdir(folder)
+    data = []
 
-        if verbose < 0: print('Abriendo archivo: ', ruta_archivo)
+    for file in files:
+        file_path = os.path.join(folder, file)
 
-        with open(ruta_archivo, 'r', encoding='utf-8') as file:
-            for linea in file:
-                correo, contraseña = separar_correo_y_contrasena(linea)
-                if correo is not None and contraseña is not None:
-                    # Check also for unknoun or null passwords
-                    if not (contraseña == 'NULL' or contraseña == 'none' or contraseña == '?'
-                            or contraseña == 'None'):
-                        datos.append([correo, contraseña])
-                    if verbose > 1: print(f"correo: {correo} contraseña: {contraseña}")
+        if verbose < 0: print('Opening file: ', file_path)
 
-    # Crear un DataFrame de pandas con todos los datos recopilados
-    df = pd.DataFrame(datos, columns=['Usuario', 'Contraseña'])
+        with open(file_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                email, password = split_email_and_password(line)
+                if email is not None and password is not None:
+                    # Check also for unknown or null passwords
+                    if not (password == 'NULL' or password == 'none' or password == '?' 
+                            or password == 'None'):
+                        data.append([email, password])
+                    if verbose > 1: print(f"email: {email} password: {password}")
+
+    # Create a pandas DataFrame with all the collected data
+    df = pd.DataFrame(data, columns=['User', 'Password'])
     return df
 
-def leerunarchivo(carpeta, numero_archivo):
-    # Obtener la lista de archivos en la carpeta
-    archivos = [f for f in os.listdir(carpeta) if f.endswith('.txt')]
+def read_single_file(folder, file_number):
+    # Get the list of files in the folder
+    files = [f for f in os.listdir(folder) if f.endswith('.txt')]
 
-    # Verificar si el número de archivo es válido
-    if numero_archivo < 1 or numero_archivo > len(archivos):
-        print("Número de archivo no válido. Por favor, elige un número entre 1 y", len(archivos))
+    # Check if the file number is valid
+    if file_number < 1 or file_number > len(files):
+        print("Invalid file number. Please choose a number between 1 and", len(files))
         return None
 
+    # Read the selected file
+    selected_file = files[file_number - 1]
+    file_path = os.path.join(folder, selected_file)
 
-    # Leer el archivo seleccionado
-    archivo_seleccionado = archivos[numero_archivo - 1]
-    ruta_archivo = os.path.join(carpeta, archivo_seleccionado)
+    data = []
 
-    datos = []
+    if verbose > 0: print('Opening file: ', file_path)
 
-    if verbose > 0: print('Abriendo archivo: ', ruta_archivo)
-
-    with open(ruta_archivo, 'r', encoding='utf-8') as file:
-        for linea in file:
-            correo, contraseña = separar_correo_y_contrasena(linea)
-            if correo is not None and contraseña is not None:
-                datos.append([correo, contraseña])
-                if verbose > 1: print(f"correo: {correo} contraseña: {contraseña}")
-        # Crear un DataFrame de pandas
-        df = pd.DataFrame(datos, columns=['Usuario', 'Contraseña'])
+    with open(file_path, 'r', encoding='utf-8') as f:
+        for line in f:
+            email, password = split_email_and_password(line)
+            if email is not None and password is not None:
+                data.append([email, password])
+                if verbose > 1: print(f"email: {email} password: {password}")
+        
+        # Create a pandas DataFrame
+        df = pd.DataFrame(data, columns=['User', 'Password'])
         return df
     
-def separar_correo_y_contrasena(cadena):
-    # Expresión regular para capturar correo y contraseña
-    patron = r"([^:]+)@([^:]+):(.+)"
+def split_email_and_password(string):
+    # Regular expression to capture email and password
+    pattern = r"([^:]+)@([^:]+):(.+)"
     
-    # Buscar coincidencias
-    coincidencia = re.match(patron, cadena)
+    # Search for matches
+    match = re.match(pattern, string)
     
-    if coincidencia:
-        correo = coincidencia.group(1) + "@" + coincidencia.group(2)
-        contrasena = coincidencia.group(3)
-        return correo, contrasena
+    if match:
+        email = match.group(1) + "@" + match.group(2)
+        password = match.group(3)
+        return email, password
     else:
         return None, None
 
-
 def extract():
-    carpeta = input("Introduce el nombre de la carpeta")
+    folder = input("Enter the folder name")
 
-    df = leer_archivos_en_carpeta(carpeta + '/data')
+    df = read_files_in_folder(folder + '/data')
 
     if df is not None:
-        print("\nDatos leídos:")
+        print("\nData read:")
         print(df)
         
-        df.to_csv(carpeta + '/datos_extraidos.csv', index=False)
-
+        df.to_csv(folder + '/extracted_data.csv', index=False)
 
 if __name__ == '__main__':
     extract()
+
