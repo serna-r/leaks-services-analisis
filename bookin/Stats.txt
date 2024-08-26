@@ -87,5 +87,5 @@ entropy
 (116.493, 122.624]        3
  Password is common:
    common   count
-0   False  129267
-1    True     682
+0   False  129174
+1    True     775

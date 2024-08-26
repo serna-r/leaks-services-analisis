@@ -1,3 +1,7 @@
+This the aim of this project is to extract and analyze some quick metrics from data leaks from different services.
+
+For ethical reasons the data leaks or sources will not be uploaded.
+
 Instructions to get the extraction and analysis of the data from each leak:
 
 1. Download leak data

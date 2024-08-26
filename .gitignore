@@ -6,9 +6,12 @@ __pycache__/
 
 # Ignorar todos los archivos .txt
 *.txt
-
-# No ignorar 'stats.txt'
+# Excluir top 100 passwords
+!top100.txt
+# Excluir 'stats.txt'
 !stats.txt
+# Excluir leaks.txt
+!leaks.txt
 
 # Ignorar todos los archivos de Excel
 *.xlsx
