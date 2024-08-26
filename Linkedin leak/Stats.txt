@@ -103,5 +103,5 @@ entropy
 (188.083, 197.982]          12
  Password is common:
    common     count
-0   False  66153486
-1    True   1088424
+0   False  65438426
+1    True   1803484

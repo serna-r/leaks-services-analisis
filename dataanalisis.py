@@ -105,7 +105,7 @@ def statistics(df, output):
     # Open output file
     f = open(output, 'w')
     # Write data
-    f.write(f"Total users read {len(df.index)} \n20 most common passwords \n{common_passwords[:20]} \nLength: \n{length_count} \ntable \n{table.to_string()} \n{interval_count.to_string()}\n Password is common:\n{df.groupby('common', observed=True).size().reset_index(name='count')}")
+    f.write(f"Total users read {len(df.index)} \n20 most common passwords \n{common_passwords[:20]} \nLength: \n{length_count.to_string()} \ntable \n{table.to_string()} \n{interval_count.to_string()}\n Password is common:\n{df.groupby('common', observed=True).size().reset_index(name='count')}")
 
 if __name__ == '__main__':
     # Load the CSV file into a DataFrame
