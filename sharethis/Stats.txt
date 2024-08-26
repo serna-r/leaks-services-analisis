@@ -105,5 +105,5 @@ entropy
 (323.0, 340.0]          2
  Password is common:
    common    count
-0   False  2237786
-1    True    31169
+0   False  2237577
+1    True    31378

@@ -92,5 +92,5 @@ entropy
 (153.831, 161.927]         31
  Password is common:
    common     count
-0   False  26230212
-1    True   1171534
+0   False  25849680
+1    True   1552066
