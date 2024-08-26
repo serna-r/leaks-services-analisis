@@ -1,7 +1,7 @@
 import pandas as pd
 import math
 
-verbose = 0
+verbose = 2
 top_100_passwords = []
 
 # Function to optimize password processing
@@ -79,9 +79,9 @@ def statistics(df, output):
     if verbose > 0: print(length_count)
 
     # Group by Character Length (for 6, 7, 8, 9, 10) and 'other' for longer or shorter passwords
-    bins = [0, 6, 7, 8, 9, 10, float('inf')]
-    labels = ['6', '7', '8', '9', '10', 'other']
-    df['Length Group'] = pd.cut(df['length'], bins=bins, labels=labels, right=False)
+    bins = [-float('inf'), 5, 6, 7, 8, 9, 10, float('inf')]
+    labels = ['smaller','6', '7', '8', '9', '10', 'bigger']
+    df['Length Group'] = pd.cut(df['length'], bins=bins, labels=labels)
     # Print to check
     if verbose > 1: print(df)
     # Aggregate the data
