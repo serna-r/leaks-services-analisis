@@ -1,7 +1,7 @@
 import pandas as pd
 import math
 
-verbose = 2
+verbose = 0
 top_100_passwords = []
 
 # Function to optimize password processing

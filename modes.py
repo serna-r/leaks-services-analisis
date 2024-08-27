@@ -7,7 +7,8 @@ def hex_to_ascii(match):
     # Convertir la cadena hexadecimal a bytes
     bytes_obj = bytes.fromhex(hex_str)
     # Convertir los bytes a una cadena ASCII
-    ascii_str = bytes_obj.decode('ascii', errors='ignore')
+    ascii_str = bytes_obj.decode('utf-8', errors='ignore')
+    ascii_str = ascii_str.replace("\x00", "")
     return ascii_str
 
 def extract_hex(text):
