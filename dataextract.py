@@ -1,10 +1,11 @@
 import os
 import pandas as pd
 import re
+import modes
 
 verbose = 0
 
-def read_files_in_folder(folder):
+def read_files_in_folder(folder, mode=None):
     files = os.listdir(folder)
     data = []
 
@@ -18,9 +19,12 @@ def read_files_in_folder(folder):
                 email, password = split_email_and_password(line)
                 if email is not None and password is not None:
                     # Check also for unknown or null passwords
-                    if not (password == 'NULL' or password == 'none' or password == '?' 
+                    if (password == 'NULL' or password == 'none' or password == '?' 
                             or password == 'None'):
-                        data.append([email, password])
+                        continue
+                    # If there is a mode selected apply it
+                    if mode != None: password = mode_select(password, mode)
+                    data.append([email, password])
                     if verbose > 1: print(f"email: {email} password: {password}")
 
     # Create a pandas DataFrame with all the collected data
@@ -79,6 +83,10 @@ def extract():
         print(df)
         
         df.to_csv(folder + '/extracted_data.csv', index=False)
+
+def mode_select(password, mode):
+    # Call the mode function
+    return getattr(modes, mode)(password)
 
 if __name__ == '__main__':
     extract()

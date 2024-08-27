@@ -6,6 +6,9 @@ from datetime import datetime
 
 verbose = 0
 
+# Special extraction modes
+modes = ['extract_hex']
+
 def print_and_log(message, log_file=None):
     with open(log_file, 'a') as log_file_descriptor:
         # Prints a message to both the console and a log file.
@@ -25,8 +28,14 @@ def main():
 
         if not data_leak_name.strip():
             continue  # Skip empty lines
+        
+        # Mode selection
+        mode = None
+        if data_leak_name.split()[-1] in modes:
+            mode = data_leak_name.split()[-1]
+            data_leak_name = data_leak_name.rsplit(' ', 1)[0]
 
-        print_and_log(f"Processing data leak: {data_leak_name}", log_file)
+        print_and_log(f"Processing data leak: {data_leak_name}, mode: {mode}", log_file)
 
         # Define the directory path based on the provided name
         data_leak_dir = os.path.join(os.getcwd(), data_leak_name)
@@ -40,7 +49,7 @@ def main():
         print_and_log("Executing data extraction...", log_file)
         start_extract_time = time.time()  # Start time of extraction
         data_folder = os.path.join(data_leak_dir, 'data')
-        df = read_files_in_folder(data_folder)
+        df = read_files_in_folder(data_folder, mode)
         end_extract_time = time.time()  # End time of extraction
 
         if df is None or df.empty:

@@ -9,3 +9,6 @@ Instructions to get the extraction and analysis of the data from each leak:
     In the form "./leakname/data"
 3. Populate leaks.txt with each leakname in a newline
 4. Execute master.py
+
+Extraction modes
+    Some specific data bases have special formats for users and passwords, for example some of them have some passwords coded as $HEX["ascii code"], the new mode code has to be added to dataextract and the name added to master. The mode is then selected adding the name given to the mode after the leakname in leaks.txt (such as sharethis $HEX) 
