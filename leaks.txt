@@ -1,6 +1,8 @@
-sharethis extract_hex
-hautelook
-linkedin leak
-mate1
-myheritage
-shein
+bookin shannon_entropy
+canvaleak shannon_entropy
+chegg shannon_entropy
+dubshmash shannon_entropy
+hautelook shannon_entropy
+linekedin leak shannon_entropy
+mate1 shannon_entropy
+sharethis shannon_entropy

@@ -25,5 +25,8 @@ source
 # Ignorar archivos CSV
 *.csv
 
+# Ignorar scripts de prueba
+tests.py
+
 # Asegúrate de que no se ignore el archivo .gitignore en sí
 !.gitignore

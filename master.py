@@ -2,12 +2,15 @@ import os
 import time  # Import the time module
 from dataextract import read_files_in_folder
 from dataanalisis import statistics
+from dataanalisis import one_stat
 from datetime import datetime
 
 verbose = 0
 
 # Special extraction modes
 modes = ['extract_hex']
+# Single stat
+stats = ['simple_entropy', 'shannon_entropy']
 
 def print_and_log(message, log_file=None):
     with open(log_file, 'a') as log_file_descriptor:
@@ -33,6 +36,12 @@ def main():
         mode = None
         if data_leak_name.split()[-1] in modes:
             mode = data_leak_name.split()[-1]
+            data_leak_name = data_leak_name.rsplit(' ', 1)[0]
+
+        stat = 'all'
+        # Stat selection
+        if data_leak_name.split()[-1] in stats:
+            stat = data_leak_name.split()[-1]
             data_leak_name = data_leak_name.rsplit(' ', 1)[0]
 
         print_and_log(f"Processing data leak: {data_leak_name}, mode: {mode}", log_file)
@@ -69,8 +78,18 @@ def main():
         # Execute data analysis
         print_and_log("Executing data analysis...", log_file)
         start_analysis_time = time.time()  # Start time of analysis
-        output_file = os.path.join(data_leak_dir, 'Stats.txt')
-        statistics(df, output_file)
+        
+
+        # Check for single stat or all stats
+        if stat in stats:
+            output_file = os.path.join(data_leak_dir, stat + '.txt')
+            print_and_log("Single stat:" + stat, log_file)
+            one_stat(df, stat, output_file)    
+        else:
+            output_file = os.path.join(data_leak_dir, 'Stats.txt')
+            print_and_log("All stats", log_file)
+            statistics(df, output_file)
+        
         end_analysis_time = time.time()  # End time of analysis
 
         # Calculate elapsed time for analysis
