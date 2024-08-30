@@ -1,5 +1,7 @@
 # Ignorar cualquier carpeta llamada 'data'
 data/
+# Ignorar el virtual enviroment
+.venv/
 
 # Ignorar pycache
 __pycache__/
