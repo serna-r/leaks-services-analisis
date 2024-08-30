@@ -27,6 +27,9 @@ def main():
         leak_names = file.read().splitlines()
 
     for data_leak_name in leak_names:
+        # Calculate leak start time
+        leak_start_time = time.time()
+        # Log file
         log_file = 'log.txt'
 
         if not data_leak_name.strip():
@@ -61,7 +64,7 @@ def main():
         df = read_files_in_folder(data_folder, mode)
         end_extract_time = time.time()  # End time of extraction
 
-        if df is None or df.empty:
+        if df is None or len(df.index) == 0:
             print_and_log("No valid data found during extraction.", log_file)
             continue
 
@@ -98,10 +101,15 @@ def main():
 
         print_and_log(f"Analysis completed successfully. Check the file '{output_file}' for results.", log_file)
 
-        # Calculate the total elapsed time for all leaks
-        total_end_time = time.time()
-        total_time_elapsed = total_end_time - total_start_time
-        print_and_log(f"Total time elapsed for all data leaks: {total_time_elapsed:.2f} seconds.\n", log_file)
+        #Calculate leak time
+        leak_end_time = time.time()
+        leak_time_elapsed = leak_end_time - leak_start_time
+        print_and_log(f"\nTotal time elapsed for data leak: {leak_time_elapsed:.2f} seconds.\n", log_file)
+
+    # Calculate the total elapsed time for all leaks
+    total_end_time = time.time()
+    total_time_elapsed = total_end_time - total_start_time
+    print_and_log(f"\n\nTotal time elapsed for all data leaks: {total_time_elapsed:.2f} seconds.\n", log_file)
 
 if __name__ == "__main__":
     main()
