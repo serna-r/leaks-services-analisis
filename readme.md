@@ -10,8 +10,10 @@ Instructions to get the extraction and analysis of the data from each leak:
 3. Populate leaks.txt with each leakname in a newline
 4. Execute master.py
 
-Extraction modes
+Extraction modes:
+
     Some specific data bases have special formats for users and passwords, for example some of them have some passwords coded as $HEX["ascii code"], the new mode code has to be added to dataextract and the name added to master. The mode is then selected adding the name given to the mode after the leakname in leaks.txt (such as sharethis $HEX) 
 
-Single stats
+Single stats:
+
     Sometimes it is not needed to use all stats, instead adding the name of the stat following the leak name calculates the single stat needed. The current implementation works for simple_entropy and shannon_entropy
