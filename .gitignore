@@ -12,6 +12,8 @@ __pycache__/
 !stats.txt
 # Excluir leaks.txt
 !leaks.txt
+# Excluir requirements
+!requirements.txt
 
 # Ignorar todos los archivos de Excel
 *.xlsx

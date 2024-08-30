@@ -1,4 +1,4 @@
-bookin shannon_entropy
+bookin
 canvaleak shannon_entropy
 chegg shannon_entropy
 dubshmash shannon_entropy

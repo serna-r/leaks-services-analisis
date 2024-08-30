@@ -1,5 +1,7 @@
 import pandas as pd
 import math
+import numpy as np
+from zxcvbn import zxcvbn
 
 verbose = 0
 top_100_passwords = []
@@ -7,13 +9,14 @@ top_100_passwords = []
 # Function to optimize password processing
 def apply_all_in_one(password):
     mask, total = password_mask(password)
-    simple_entropy = simple_entropy(password)
-    shannon_entropy = shannon_entropy(password)
+    simpleentropy = simple_entropy(password)
+    shannonentropy = shannon_entropy(password)
     length = len(password)
     load_top_100(file_path='top100.txt')
     common = is_common_password(password)
+    score , guesses = password_strength(password)
 
-    return mask, total, simple_entropy, length, common
+    return mask, total, length, simpleentropy, shannonentropy, common, score, guesses
 
 # Apply only one stat
 def apply_one(password, metric):
@@ -62,6 +65,7 @@ def simple_entropy(word):
     
     return simple_entropy
 
+# H(X) = - Σ [p(x) * log2(p(x))]
 def shannon_entropy(password):
     # Count the frequency of each character in the word
     frequencies = {}
@@ -80,6 +84,10 @@ def shannon_entropy(password):
     
     return entropy
 
+def password_strength(password):
+    result = zxcvbn(password)
+    return result.get('score'), float(result.get('guesses'))
+
 # Calculate only one stat
 def one_stat(df, metric, output):
     # Apply stat to df
@@ -90,6 +98,24 @@ def one_stat(df, metric, output):
         interval_count = df.groupby(intervals, observed=True)['Password'].count()
         with open(output, 'w') as f:
             f.write(f'{interval_count.to_string()}')
+
+    if metric == 'password_strength':
+        # Break column into score and guesses
+        df[['score', 'guesses']] = pd.DataFrame(df['password_strength'].tolist(), index=df.index)
+
+        # Process scores and count
+        score_count = df.groupby('score', observed=True)['Password'].count()
+
+        # Create logarithmic bins
+        bins = np.logspace(np.log10(df['guesses'].min()), np.log10(df['guesses'].max()), 21)
+        # Apply pd.cut with these bins
+        intervalsguesses = pd.cut(df['guesses'], bins=bins)
+        # Count how many passwords are in each interval
+        intervalsguesses_count = df.groupby(intervalsguesses, observed=True)['Password'].count()
+
+        # Write output
+        with open(output, 'w') as f:
+            f.write(f'{score_count}\n{intervalsguesses_count.to_string()}')
     return
 
 def statistics(df, output):
@@ -106,7 +132,7 @@ def statistics(df, output):
     # Generate a statistical report of the passwords
 
     # Apply all the functions to each password and add to the dataframe
-    df['mask'], df['total'], df['simple_entropy'], df['shannon_entropy'], df['length'], df['common'] = zip(*df['Password'].map(apply_all_in_one))
+    df['mask'], df['total'], df['length'], df['simple_entropy'], df['shannon_entropy'], df['common'], df['score'], df['guesses'] = zip(*df['Password'].map(apply_all_in_one))
 
     if verbose >= 0: print('Applyed functions, now processing')
 
@@ -142,14 +168,46 @@ def statistics(df, output):
     # Show the table with the results
     if verbose > 0: print(intervalshannon_count)
 
+    # Print table with common passwords
     if verbose > 0: print('Password is common: ', df.groupby('common', observed=True).size().reset_index(name='count'))
+
+    # Process scores and count
+    score_count = df.groupby('score', observed=True)['Password'].count()
+    if verbose > 0: print('Score count: ', score_count)
+
+    # Group guesses for graphs
+    # Create logarithmic bins
+    bins = np.logspace(np.log10(df['guesses'].min()), np.log10(df['guesses'].max()), 21)
+    # Apply pd.cut with these bins
+    intervalsguesses = pd.cut(df['guesses'], bins=bins)
+    # Count how many passwords are in each interval
+    intervalsguesses_count = df.groupby(intervalsguesses, observed=True)['Password'].count()
+
 
     if verbose >= 0: print('\nData processed columns created: ', df.columns.values)
 
     # Open output file
     f = open(output, 'w')
     # Write data
-    f.write(f"Total users read {len(df.index)} \n20 most common passwords \n{common_passwords[:20]} \nLength: \n{length_count.to_string()} \ntable \n{table.to_string()} \n{intervalse_count.to_string()}\n{intervalshannon_count.to_string()}\n Password is common:\n{df.groupby('common', observed=True).size().reset_index(name='count')}")
+    f.write(
+    f"Total users read: {len(df.index)}\n\n"
+    "20 Most Common Passwords:\n"
+    f"{common_passwords[:20]}\n\n"
+    "Password Length Distribution:\n"
+    f"{length_count.to_string()}\n\n"
+    "Password mask:\n"
+    f"{table.to_string()}\n\n"
+    "Simple entropy table:\n"
+    f"{intervalse_count.to_string()}\n\n"
+    "Shannon Entropy table:\n"
+    f"{intervalshannon_count.to_string()}\n\n"
+    "Password in most 100 most commmon:\n"
+    f"{df.groupby('common', observed=True).size().reset_index(name='count')}\n\n"
+    "Score Distribution:\n"
+    f"{score_count}\n\n"
+    "Guesses Interval Count:\n"
+    f"{intervalsguesses_count.to_string()}\n"
+    )
 
 if __name__ == '__main__':
     # Load the CSV file into a DataFrame
