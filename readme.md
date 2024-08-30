@@ -13,13 +13,13 @@ Instructions to get the extraction and analysis of the data from each leak:<br/>
 4. Execute master.py
 
 Stats:<br/>
-    *Mask: password mask format in luds format (l for lower, u for upper, d for decimal, s for special)<br/>
-    *Length<br/>
-    *simpleentropy: E = L × log(R) / log(2)<br/>
-    *shannonentropy: H(X) = - Σ [p(x) * log2(p(x))] <br/>
-    *Is common if the password is in the list of the 100 most common passwords<br/>
-    *Score in zxcvbn<br/>
-    *Guesses in zxcvbn<br/>
+    * Mask: password mask format in luds format (l for lower, u for upper, d for decimal, s for special)<br/>
+    * Length<br/>
+    * simpleentropy: E = L × log(R) / log(2)<br/>
+    * shannonentropy: H(X) = - Σ [p(x) * log2(p(x))] <br/>
+    * Is common if the password is in the list of the 100 most common passwords<br/>
+    * Score in zxcvbn<br/>
+    * Guesses in zxcvbn<br/>
 
 Extraction modes:<br/>
     Some specific data bases have special formats for users and passwords, for example some of them have some passwords coded as $HEX["ascii code"], the new mode code has to be added to dataextract and the name added to master. The mode is then selected adding the name given to the mode after the leakname in leaks.txt (such as sharethis $HEX) <br/>
