@@ -5,38 +5,82 @@ from scipy.stats import entropy
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
-from sklearn.feature_selection import mutual_info_classif
+import math
 
 figures_folder = 'figures/'
 
-def get_count_and_probabilities(leak):
-    # Get leak file name
-    leak = './' + leak + '/Stats.txt'
-    # Open file and get stats
-    with open(leak, 'r') as f:
-        data = f.read()
-
-        # Extract total users read
-        total_users_match = re.search(r"Total users read: (\d+)", data)
-        total_users = int(total_users_match.group(1)) if total_users_match else None
-
-        # Extract score distribution
-        score_distribution = defaultdict(int)
-        score_section_match = re.search(r"Score Distribution:\nscore\n((?:\d+\s+\d+\n)+)", data)
-
-        if score_section_match:
-            score_lines = score_section_match.group(1).strip().split('\n')
-            for line in score_lines:
-                score, count = map(int, line.split())
-                score_distribution[score] = count
-
-        # Convert scores into probabilities
-        probability_dist = []
-        count_list = []
-        for score, count in score_distribution.items():
-            count_list.append(count)
-            probability_dist.append(count/total_users)
+def get_mask_distribution(data):
     
+    # Get the file split in lines
+    lines = data.splitlines()
+
+    # Extract the table data from the content
+    start_idx = None
+    end_idx = None
+
+    for i, line in enumerate(lines):
+        if line.strip().startswith("Password mask:"):
+            start_idx = i
+        elif line.strip() == "":  # If empty line encountered, stop
+            if start_idx is not None:
+                end_idx = i
+                break
+
+    # Now extract the lines that correspond to the table
+    table_lines = lines[start_idx:end_idx]
+
+    # Create a DataFrame from the extracted lines
+    # The first row is the header
+    header = table_lines[1].split()
+    data = []
+
+    # Parse the remaining rows
+    for line in table_lines[3:]:
+        # Eliminate nan ocurrences by substituting 0
+        line = line.replace('NaN', '0')
+        # Split in spaces
+        row = line.split()
+
+        # Convert value bigger and smaller to numbers
+        if not row[0].isnumeric():
+            if row[0] == 'smaller': row[0] = 0
+            if row[0] == 'bigger': row[0] = -1
+
+        # Append line
+        data.append(map(float, row))
+
+    # Create a pandas DataFrame
+    df = pd.DataFrame(data, columns=header)
+
+    # Drop column z to have same size matrices (this column only holds non utf-8 values)
+    if 'z' in df.columns: df = df.drop(columns=['z'])
+    
+    # Eliminate the column total which is always 100, and return it
+    return df.drop(columns=['total'])
+
+def get_count_and_probabilities(data):
+
+    # Extract total users read
+    total_users_match = re.search(r"Total users read: (\d+)", data)
+    total_users = int(total_users_match.group(1)) if total_users_match else None
+
+    # Extract score distribution
+    score_distribution = defaultdict(int)
+    score_section_match = re.search(r"Score Distribution:\nscore\n((?:\d+\s+\d+\n)+)", data)
+
+    if score_section_match:
+        score_lines = score_section_match.group(1).strip().split('\n')
+        for line in score_lines:
+            score, count = map(int, line.split())
+            score_distribution[score] = count
+
+    # Convert scores into probabilities
+    probability_dist = []
+    count_list = []
+    for score, count in score_distribution.items():
+        count_list.append(count)
+        probability_dist.append(count/total_users)
+
     # Return probability list
     return count_list, probability_dist
 
@@ -48,6 +92,7 @@ def compute_kl_matrix(distributions, names):
         for j in range(num_distributions):
             if i != j:
                 kl_matrix[i, j] = entropy(distributions[i], distributions[j])
+                if math.isinf(kl_matrix[i,j]): print(f'i: {distributions[i]} j: {distributions[j]}')
             else:
                 kl_matrix[i, j] = 0.0  # KL divergence between identical distributions is 0
 
@@ -55,6 +100,19 @@ def compute_kl_matrix(distributions, names):
     kl_df = pd.DataFrame(kl_matrix, index=names, columns=names)
 
     return kl_df
+
+def compute_kl_matrix_mask(distributions, names):
+    # For each length distribution calculate kl matrix
+    for i in range(len(distributions[0].index)):
+        # Get each length distribution
+        length_dist = []
+        for distribution in distributions:
+            dist = distribution.iloc[i].to_list()
+            length_dist.append(dist)
+        
+        print(f'length: {i} -----------------------')
+        print(compute_kl_matrix(length_dist, names))
+        
 
 def plot_distributions(distributions, names):
     num_distributions = len(distributions)
@@ -110,21 +168,36 @@ def get_distribution_comparison():
         leak_names = file.read().splitlines()
     # Variable to store probability distributions
     counts = []
-    distributions = []
+    score_distributions = []
+    mask_dataframes = []
     
     # For each leak get score distributions
     for leak in leak_names:
-        count, probability = get_count_and_probabilities(leak)
-        counts.append(count)
-        distributions.append(probability)
+        # Get leak file name
+        leak = './' + leak + '/Stats.txt'
+        # Open file and get stats
+        with open(leak, 'r') as f:
+            # Read file
+            data = f.read()
+            # Get count and probabilities for score
+            count, probability = get_count_and_probabilities(data)
+            # Get mask distributions
+            mask_df = get_mask_distribution(data)
 
-    # Get the kl matrix
-    kl_df = compute_kl_matrix(distributions, leak_names)
+        counts.append(count)
+        score_distributions.append(probability)
+        mask_dataframes.append(mask_df)
+
+    # Get the kl matrix for score
+    kl_df_score = compute_kl_matrix(score_distributions, leak_names)
+
+    # Get kl matrix for mask and length
+    kl_df_mask = compute_kl_matrix_mask(mask_dataframes, leak_names)
 
     # Plot and save the score distributions
-    plot_distributions(distributions, leak_names).savefig(figures_folder + 'scores_distribution.png')
+    plot_distributions(score_distributions, leak_names).savefig(figures_folder + 'scores_distribution.png')
     # Plot and save the kl matrix
-    plot_matrix(kl_df.values, leak_names, 'coolwarm').savefig(figures_folder + 'scores_kl_matrix.png')
+    plot_matrix(kl_df_score.values, leak_names, 'coolwarm').savefig(figures_folder + 'scores_kl_matrix.png')
 
 if __name__ == '__main__':
     get_distribution_comparison()
