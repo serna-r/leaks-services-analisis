@@ -83,3 +83,7 @@ def shannon_entropy(password):
 def password_strength(password):
     result = zxcvbn(password)
     return result.get('score'), float(result.get('guesses'))
+
+def password_score_and_length(password):
+    result = zxcvbn(password)
+    return [result.get('score'), len(password)]

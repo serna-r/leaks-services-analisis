@@ -1,7 +1,5 @@
 import pandas as pd
-import math
 import numpy as np
-from zxcvbn import zxcvbn
 from parallelprocessing import parallel_proc_all, parallel_proc_one
 
 verbose = 0
@@ -35,6 +33,19 @@ def one_stat(df, metric, output):
         # Write output
         with open(output, 'w') as f:
             f.write(f'{score_count}\n{intervalsguesses_count.to_string()}')
+
+    if metric == 'password_score_and_length':
+        df[['score', 'length']] = pd.DataFrame(df.password_score_and_length.tolist(), index= df.index)
+        # Group by Character Length (for 6, 7, 8, 9, 10) and 'other' for longer or shorter passwords
+        bins = [-float('inf'), 5, 6, 7, 8, 9, 10, float('inf')]
+        labels = ['smaller','6', '7', '8', '9', '10', 'bigger']
+        df['Length Group'] = pd.cut(df['length'], bins=bins, labels=labels)
+
+        # Aggregate the data
+        table = df.groupby('Length Group', observed=True)['score'].value_counts().unstack(level=1)
+        # Write output
+        with open(output, 'w') as f:
+            f.write(f'Score by length\n{table.to_string()}')
     return
 
 def statistics(df, output):

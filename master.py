@@ -10,7 +10,7 @@ verbose = 0
 # Special extraction modes
 modes = ['extract_hex']
 # Single stat
-stats = ['simple_entropy', 'shannon_entropy', 'password_strength']
+stats = ['simple_entropy', 'shannon_entropy', 'password_strength', 'password_score_and_length']
 
 def print_and_log(message, log_file=None):
     with open(log_file, 'a') as log_file_descriptor:
