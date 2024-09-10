@@ -36,8 +36,8 @@ def get_mask_distribution(data):
 
     # Parse the remaining rows
     for line in table_lines[3:]:
-        # Eliminate nan ocurrences by substituting 0
-        line = line.replace('NaN', '0')
+        # Eliminate nan ocurrences by substituting almost 0 not to break entropy
+        line = line.replace('NaN', '0.0000000000000000000000000000000000000001')
         # Split in spaces
         row = line.split()
 
@@ -91,8 +91,8 @@ def compute_kl_matrix(distributions, names):
     for i in range(num_distributions):
         for j in range(num_distributions):
             if i != j:
-                kl_matrix[i, j] = entropy(distributions[i], distributions[j])
-                if math.isinf(kl_matrix[i,j]): print(f'i: {distributions[i]} j: {distributions[j]}')
+                kl_matrix[i, j] = entropy(distributions[i], distributions[j], nan_policy='omit')
+                if math.isinf(kl_matrix[i, j]): print(distributions[i], distributions[j])
             else:
                 kl_matrix[i, j] = 0.0  # KL divergence between identical distributions is 0
 
@@ -102,17 +102,21 @@ def compute_kl_matrix(distributions, names):
     return kl_df
 
 def compute_kl_matrix_mask(distributions, names):
+    # Eliminate mask column
+    distributions_drop_mask = [df.drop(['mask'], axis=1) for df in distributions]
+
+    kl_matrices = []
     # For each length distribution calculate kl matrix
-    for i in range(len(distributions[0].index)):
+    for i in range(len(distributions_drop_mask[0].index)):
         # Get each length distribution
         length_dist = []
-        for distribution in distributions:
-            dist = distribution.iloc[i].to_list()
-            length_dist.append(dist)
+        for distribution in distributions_drop_mask:
+            length_dist.append(distribution.iloc[i].to_list())
         
-        print(f'length: {i} -----------------------')
-        print(compute_kl_matrix(length_dist, names))
-        
+        # Append length and kl matrix
+        kl_matrices.append([(i+5),compute_kl_matrix(length_dist, names)])
+
+    return kl_matrices
 
 def plot_distributions(distributions, names):
     num_distributions = len(distributions)
@@ -184,20 +188,26 @@ def get_distribution_comparison():
             # Get mask distributions
             mask_df = get_mask_distribution(data)
 
+        # Get score counts, probabilities and scores
         counts.append(count)
         score_distributions.append(probability)
         mask_dataframes.append(mask_df)
-
+    
+    
     # Get the kl matrix for score
     kl_df_score = compute_kl_matrix(score_distributions, leak_names)
 
     # Get kl matrix for mask and length
-    kl_df_mask = compute_kl_matrix_mask(mask_dataframes, leak_names)
+    kl_dfs_mask = compute_kl_matrix_mask(mask_dataframes, leak_names)
 
     # Plot and save the score distributions
     plot_distributions(score_distributions, leak_names).savefig(figures_folder + 'scores_distribution.png')
     # Plot and save the kl matrix
     plot_matrix(kl_df_score.values, leak_names, 'coolwarm').savefig(figures_folder + 'scores_kl_matrix.png')
+
+    # For each mask matrix plot
+    for item in kl_dfs_mask:
+        plot_matrix(item[1].values, leak_names, 'coolwarm').savefig(figures_folder + f'mask_length_{item[0]}_kl_matrix.png')
 
 if __name__ == '__main__':
     get_distribution_comparison()
