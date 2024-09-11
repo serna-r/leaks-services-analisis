@@ -16,6 +16,12 @@ __pycache__/
 !leaks.txt
 # Excluir requirements
 !requirements.txt
+# Excluir score
+!password_score.txt
+# Excluir score por tamaño
+!password_score_and_length.txt
+# Excluir entropía de shannon
+!shannon_entropy.txt
 
 # Ignorar todos los archivos de Excel
 *.xlsx
