@@ -36,8 +36,8 @@ def get_mask_distribution(data):
 
     # Parse the remaining rows
     for line in table_lines[3:]:
-        # Eliminate nan ocurrences by substituting almost 0 not to break entropy
-        line = line.replace('NaN', '0.0000000000000000000000000000000000000001')
+        # # Eliminate nan ocurrences by substituting almost 0 not to break entropy
+        # line = line.replace('NaN', '0.0')
         # Split in spaces
         row = line.split()
 
@@ -95,6 +95,11 @@ def get_score_and_length(file_path):
 
     # Reset index so "Length" is no longer part of the index
     df.reset_index(drop=True, inplace=True)
+
+    # Cast to float and get probabilities
+    df[['0','1','2','3','4']] = df[['0','1','2','3','4']].astype(float)
+    df[['0','1','2','3','4']] = df[['0','1','2','3','4']].div(df[['0','1','2','3','4']].sum(axis=1), axis=0)
+
     # Return the obtained df
     return df
 
@@ -105,9 +110,7 @@ def compute_kl_matrix(distributions, names):
     for i in range(num_distributions):
         for j in range(num_distributions):
             if i != j:
-                # print(distributions[i], distributions[j], '\n')
                 kl_matrix[i, j] = entropy(distributions[i], distributions[j], nan_policy='omit')
-                # if math.isinf(kl_matrix[i, j]): print(distributions[i], distributions[j])
             else:
                 kl_matrix[i, j] = 0.0  # KL divergence between identical distributions is 0
 
@@ -116,7 +119,7 @@ def compute_kl_matrix(distributions, names):
 
     return kl_df
 
-def compute_kl_matrix_dfs(distributions, names, dropcolumn, forceformat='float'):
+def compute_kl_matrix_dfs(distributions, names, dropcolumn):
     # Eliminate column without data
     distributions_drop_column = [df.drop([dropcolumn], axis=1) for df in distributions]
 
@@ -126,9 +129,7 @@ def compute_kl_matrix_dfs(distributions, names, dropcolumn, forceformat='float')
         # Get each length distribution
         length_dist = []
         for distribution in distributions_drop_column:
-            if forceformat == 'none' : length_dist.append(distribution.iloc[i].to_list())
-            # Check if there is a need to format the elements to float
-            elif forceformat == 'float': length_dist.append(list(map(float, distribution.iloc[i].to_list())))
+            length_dist.append(distribution.iloc[i].to_list())
         
         # Append length and kl matrix
         kl_matrices.append([(i+5),compute_kl_matrix(length_dist, names)])
@@ -218,7 +219,6 @@ def get_distribution_comparison():
         mask_dataframes.append(mask_df)
         score_length_dataframes.append(score_length_df)
     
-    
     # Get the kl matrix for score
     kl_df_score = compute_kl_matrix(score_distributions, leak_names)
 
@@ -226,7 +226,7 @@ def get_distribution_comparison():
     kl_dfs_mask = compute_kl_matrix_dfs(mask_dataframes, leak_names, 'mask')
 
     # Get kl matrix for score and length, format np to eliminate np.float values
-    kl_dfs_score_length = compute_kl_matrix_dfs(score_length_dataframes, leak_names, 'length', forceformat='float')
+    kl_dfs_score_length = compute_kl_matrix_dfs(score_length_dataframes, leak_names, 'length')
 
     # Plot and save the score distributions
     plot_distributions(score_distributions, leak_names).savefig(figures_folder + 'scores_distribution.png')
