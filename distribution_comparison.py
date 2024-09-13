@@ -147,16 +147,16 @@ def get_colors(leak_types):
     base_colors = {
         'business': plt.get_cmap('Blues'),
         'digitaltool': plt.get_cmap('Greens'),
-        'social': plt.get_cmap('Reds'),
-        'shopping': plt.get_cmap('Purples')
+        'shopping': plt.get_cmap('Greys'),
+        'social': plt.get_cmap('Reds')
     }
 
     # Dictionary to track the number of times a category appears
     category_count = {
         'business': 0,
         'digitaltool': 0,
-        'social': 0,
-        'shopping': 0
+        'shopping': 0,
+        'social': 0
     }
     
     colors = []
