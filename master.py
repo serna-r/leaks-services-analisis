@@ -5,8 +5,14 @@ from dataanalisis import statistics
 from dataanalisis import one_stat
 from datetime import datetime
 
-verbose = 0
+# Assuming get_distribution_comparison is imported
+from distribution_comparison import get_distribution_comparison
 
+verbose = 0
+# File for leak analysis
+leak_stats_file = "leaks.txt"
+# File for leak distributions
+leak_distribution_file='leak_types.txt'
 # Special extraction modes
 modes = ['extract_hex']
 # Single stat
@@ -19,11 +25,11 @@ def print_and_log(message, log_file=None):
         if log_file_descriptor:
             print('[' + str(datetime.now()) + ']: ' + message, file=log_file_descriptor)  # Print to file
 
-def main():
+def process_leaks():
     total_start_time = time.time()  # Start time for the entire process
 
     # Read the leak names from a text file
-    with open("leaks.txt", "r") as file:
+    with open(leak_stats_file, "r") as file:
         leak_names = file.read().splitlines()
 
     for data_leak_name in leak_names:
@@ -81,7 +87,6 @@ def main():
         # Execute data analysis
         print_and_log("Executing data analysis...", log_file)
         start_analysis_time = time.time()  # Start time of analysis
-        
 
         # Check for single stat or all stats
         if stat in stats:
@@ -101,7 +106,7 @@ def main():
 
         print_and_log(f"Analysis completed successfully. Check the file '{output_file}' for results.", log_file)
 
-        #Calculate leak time
+        # Calculate leak time
         leak_end_time = time.time()
         leak_time_elapsed = leak_end_time - leak_start_time
         print_and_log(f"\nTotal time elapsed for data leak: {leak_time_elapsed:.2f} seconds.\n", log_file)
@@ -111,5 +116,42 @@ def main():
     total_time_elapsed = total_end_time - total_start_time
     print_and_log(f"\n\nTotal time elapsed for all data leaks: {total_time_elapsed:.2f} seconds.\n", log_file)
 
+def get_distribution_comparison_with_logging():
+    log_file = 'log.txt'
+
+    # Start time for the distribution comparison process
+    start_time = time.time()
+    print_and_log("Starting distribution comparison...", log_file)
+
+    # Call the actual distribution comparison function
+    get_distribution_comparison(leak_distribution_file)
+
+    # End time for the process
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+
+    print_and_log(f"Distribution comparison completed successfully.", log_file)
+    print_and_log(f"Elapsed time for distribution comparison: {elapsed_time:.2f} seconds.\n", log_file)
+
+
+def menu():
+    while True:
+        print("\nMenu:")
+        print("1. Process leaks and gather statistics. (file leaks.txt)")
+        print("2. Get distribution comparison. (file leak_types.txt)")
+        print("3. Exit.")
+
+        choice = input("Enter your choice (1/2/3): ")
+
+        if choice == '1':
+            process_leaks()
+        elif choice == '2':
+            get_distribution_comparison_with_logging()
+        elif choice == '3':
+            print("Exiting the program.")
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
 if __name__ == "__main__":
-    main()
+    menu()

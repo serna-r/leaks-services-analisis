@@ -6,8 +6,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from matplotlib.colors import to_rgba
+import warnings
 
-leaks_file = 'leak_types.txt'
+# Suppress the FutureWarning and the runtime one
+warnings.simplefilter(action='ignore', category=FutureWarning)
+warnings.simplefilter(action='ignore', category=RuntimeWarning)
+
 figures_folder = 'figures/'
 
 def get_mask_distribution(data):
@@ -231,7 +235,7 @@ def plot_scores_by_length(distributions, names, colors=None):
         distribution_data = all_data[all_data['Distribution'] == name]
 
         # Convert 'Probability' to numeric to ensure there are no issues with invalid types
-        distribution_data['Probability'] = pd.to_numeric(distribution_data['Probability'], errors='coerce')
+        distribution_data.loc[:, 'Probability'] = pd.to_numeric(distribution_data['Probability'], errors='coerce')
 
         # Get the x positions that match the filtered data
         indices = [np.where(x_labels == label)[0][0] for label in distribution_data['Label']]
@@ -282,7 +286,7 @@ def plot_matrix(data, labels, cmap, vmin=0, vmax=2):
 
     return plt
 
-def get_distribution_comparison():
+def get_distribution_comparison(leaks_file='leak_types.txt'):
     # Get leaks with categories
     leak_types = []
     # Read the leak names from a text file
@@ -300,8 +304,7 @@ def get_distribution_comparison():
 
     # Get names list
     leak_names = [leak_name for leak_name, _ in leak_types]
-    print(leak_types)
-    print(leak_names)
+
     # Variable to store probability distributions
     counts = []
     score_distributions = []

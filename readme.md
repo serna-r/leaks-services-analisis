@@ -9,8 +9,17 @@ Instructions to get the extraction and analysis of the data from each leak:<br/>
 1. Download leak data
 2. Place the txt in format user:pass in the folder with the name of the leak and inside folder data
     In the form "./leakname/data"
-3. Populate leaks.txt with each leakname in a newline
+3. Populate leaks.txt or leak_types.txt with each leakname in a newline
 4. Execute master.py
+5. Choose option:
+    1. Process leaks and gather statistics. (file leaks.txt)
+    2. Get distribution comparison. (file leak_types.txt) --------- (the files stats.txt and password_score_and_length must have been generated or placed in the correct place)
+    3. Exit.
+
+<br/><br/>
+Distribution comparison:<br/>
+The distribution comparison creates in the figures folder some graphs to analyze the similitudes between the data leaks, it creates Kullback-Leibler matrices for masks by length, scores by length and global scores, it also creates histograms for scores and scores by length
+<br/>
 
 Stats:<br/>
     - Mask: password mask format in luds format (l for lower, u for upper, d for decimal, s for special)<br/>
