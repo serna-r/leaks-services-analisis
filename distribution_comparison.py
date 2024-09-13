@@ -5,7 +5,9 @@ from scipy.stats import entropy
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+from matplotlib.colors import to_rgba
 
+leaks_file = 'leak_types.txt'
 figures_folder = 'figures/'
 
 def get_mask_distribution(data):
@@ -136,17 +138,40 @@ def compute_kl_matrix_dfs(distributions, names, dropcolumn):
     return kl_matrices
 
 # Get diferent colors for each type of service
-def get_colors(file_name):
-    service_types = []
-    service_colors = []
-    # Get leak types
-    with open(file_name) as f:
-        for line in f.readlines():
-            if line.split()[-1] in service_types:
-                # TO-DO
-                print('TODO')
+def get_colors(leak_types):
+    # Base colors for each category using matplotlib colormaps
+    base_colors = {
+        'business': plt.get_cmap('Blues'),
+        'digitaltool': plt.get_cmap('Greens'),
+        'social': plt.get_cmap('Reds'),
+        'shopping': plt.get_cmap('Purples')
+    }
 
-    return service_colors
+    # Dictionary to track the number of times a category appears
+    category_count = {
+        'business': 0,
+        'digitaltool': 0,
+        'social': 0,
+        'shopping': 0
+    }
+    
+    colors = []
+        
+        # For each line in the file
+    for leak in leak_types:
+        category = leak[-1]  # The category is the second item of the dict
+        
+        # Increment the count for this category to vary the brightness
+        category_count[category] += 1
+        
+        # Get a color from the colormap with different brightness
+        colormap = base_colors[category]
+        color = colormap(category_count[category] / len([l for l in leak_types if category in l]))  # Normalized brightness level
+        
+        # Append the color
+        colors.append(to_rgba(color))
+    
+    return colors
             
 
 def plot_distributions(distributions, names, colors=None):
@@ -159,7 +184,8 @@ def plot_distributions(distributions, names, colors=None):
     plt.figure(figsize=(12, 6))
     
     for i, distribution in enumerate(distributions):
-        plt.bar(x + i * bar_width, distribution, bar_width, label=names[i])
+        # Plot the bar with the appropiate color if it is specified
+        plt.bar(x + i * bar_width, distribution, bar_width, label=names[i], color=colors[i] if colors else None)
     
     plt.xlabel('Scores zxcvbn')
     plt.ylabel('Probability')
@@ -170,7 +196,7 @@ def plot_distributions(distributions, names, colors=None):
     return plt
 
 
-def plot_scores_by_length(distributions, names):
+def plot_scores_by_length(distributions, names, colors=None):
         # Create a list to store all flattened distributions
     flattened_data = []
 
@@ -214,7 +240,7 @@ def plot_scores_by_length(distributions, names):
         indices = np.array(indices, dtype=int)
 
         # Plot the bars for the current distribution
-        plt.bar(indices + i * bar_width, distribution_data['Probability'].fillna(0), bar_width, label=name)
+        plt.bar(indices + i * bar_width, distribution_data['Probability'].fillna(0), bar_width, label=name, color=colors[i] if colors else None)
 
     plt.xlabel('Length Group and Score')
     plt.ylabel('Probability')
@@ -257,9 +283,25 @@ def plot_matrix(data, labels, cmap, vmin=0, vmax=2):
     return plt
 
 def get_distribution_comparison():
+    # Get leaks with categories
+    leak_types = []
     # Read the leak names from a text file
-    with open("leaks.txt", "r") as file:
-        leak_names = file.read().splitlines()
+    with open(leaks_file, "r") as file:
+        for line in  file.read().splitlines():
+            parts = line.rsplit(maxsplit=1)  # Split by last space
+            entry_name = parts[0].strip()   # The entry name
+            category = parts[1].strip()     # The category (remaining part of the line)
+
+            # Append entry and category as a tuple to entries list
+            leak_types.append((entry_name, category))
+
+    # Sort entries by category name
+    leak_types.sort(key=lambda x: x[1])
+
+    # Get names list
+    leak_names = [leak_name for leak_name, _ in leak_types]
+    print(leak_types)
+    print(leak_names)
     # Variable to store probability distributions
     counts = []
     score_distributions = []
@@ -298,10 +340,13 @@ def get_distribution_comparison():
     # Get kl matrix for score and length, format np to eliminate np.float values
     kl_dfs_score_length = compute_kl_matrix_dfs(score_length_dataframes, leak_names, 'length')
 
+    # Get the colors for the plots
+    colors = get_colors(leak_types)
+
     # Plot and save the score distributions
-    plot_distributions(score_distributions, leak_names).savefig(figures_folder + 'scores_distribution.png')
+    plot_distributions(score_distributions, leak_names, colors).savefig(figures_folder + 'scores_distribution.png')
     # Plot and save the score by length distribution
-    plot_scores_by_length(score_length_dataframes, leak_names).savefig(figures_folder + 'scores_length_distribution.png')
+    plot_scores_by_length(score_length_dataframes, leak_names, colors).savefig(figures_folder + 'scores_length_distribution.png')
     # Plot and save the kl matrix
     plot_matrix(kl_df_score.values, leak_names, 'coolwarm').savefig(figures_folder + 'scores_kl_matrix.png')
 
