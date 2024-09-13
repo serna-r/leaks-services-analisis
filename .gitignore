@@ -22,6 +22,8 @@ __pycache__/
 !password_score_and_length.txt
 # Excluir entropía de shannon
 !shannon_entropy.txt
+# Excluir tipos de leaks
+!leak_types.txt
 
 # Ignorar todos los archivos de Excel
 *.xlsx

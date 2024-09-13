@@ -5,7 +5,6 @@ from scipy.stats import entropy
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
-import math
 
 figures_folder = 'figures/'
 
@@ -136,7 +135,21 @@ def compute_kl_matrix_dfs(distributions, names, dropcolumn):
 
     return kl_matrices
 
-def plot_distributions(distributions, names):
+# Get diferent colors for each type of service
+def get_colors(file_name):
+    service_types = []
+    service_colors = []
+    # Get leak types
+    with open(file_name) as f:
+        for line in f.readlines():
+            if line.split()[-1] in service_types:
+                # TO-DO
+                print('TODO')
+
+    return service_colors
+            
+
+def plot_distributions(distributions, names, colors=None):
     num_distributions = len(distributions)
     num_categories = len(distributions[0])
     
