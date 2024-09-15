@@ -293,7 +293,7 @@ def plot_matrix(data, labels, cmap, vmin=0, vmax=2):
                 ax.text(j, i+0.1, '.', ha='center', va='center', color='green', fontsize=15)
             
     # Add text for quantile explanation
-    plt.text(4, 10, f'Q1 (green) {q1:.5f}, Q0.10 (red) {q010:.5f}, Q0.15 (yellow) {q015:.5f}', horizontalalignment='center')
+    plt.text(4, 10, f'Q1 (green) {q1:.5f}, Q0.15 (yellow) {q015:.5f}, Q0.10 (red) {q010:.5f}', horizontalalignment='center')
     # Add white boxes to cover the diagonal
     for i in range(len(labels)):
         ax.add_patch(patches.Rectangle((i - 0.5, i - 0.5), 1, 1, fill=True, color='white'))
