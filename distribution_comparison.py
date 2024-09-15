@@ -258,6 +258,12 @@ def plot_scores_by_length(distributions, names, colors=None):
     return plt
 
 def plot_matrix(data, labels, cmap, vmin=0, vmax=2):
+    # Get values without the main diagonal (as it is always o)
+    non_diag_values = data[~np.eye(data.shape[0], dtype=bool)]
+    # Get quantiles 0.10 and 0.15
+    q1 = np.quantile(non_diag_values, .25)
+    q010 = np.quantile(non_diag_values, .10)
+    q015 = np.quantile(non_diag_values, .15)
     # Create plot
     fig, ax = plt.subplots(figsize=(10, 10))
     # Set color scale to range from 0 to 2
@@ -275,15 +281,44 @@ def plot_matrix(data, labels, cmap, vmin=0, vmax=2):
     # Add top margin
     plt.subplots_adjust(top=0.8)
 
-    # Annotate each cell with the numerical value
+    # Annotate each cell with the numerical value and add points if lower than quantile
     for i in range(len(labels)):
         for j in range(len(labels)):
-            ax.text(j, i, f'{data[i, j]:.3f}', ha='center', va='center', color='white', fontsize=10)
-
+            ax.text(j, i, f'{data[i, j]:.4f}', ha='center', va='center', color='white', fontsize=10)
+            if i!=j and data[i, j] < q010:
+                ax.text(j, i+0.1, '.', ha='center', va='center', color='red', fontsize=20)
+            elif i!=j and data[i, j] < q015:
+                ax.text(j, i+0.1, '.', ha='center', va='center', color='yellow', fontsize=20)
+            elif i!=j and data[i, j] < q1:
+                ax.text(j, i+0.1, '.', ha='center', va='center', color='green', fontsize=15)
+            
+    # Add text for quantile explanation
+    plt.text(4, 10, f'Q1 (green) {q1:.5f}, Q0.10 (red) {q010:.5f}, Q0.15 (yellow) {q015:.5f}', horizontalalignment='center')
     # Add white boxes to cover the diagonal
     for i in range(len(labels)):
         ax.add_patch(patches.Rectangle((i - 0.5, i - 0.5), 1, 1, fill=True, color='white'))
 
+    return plt
+
+def boxwhiskers_from_kl_matrix(kl_matrix):
+    # Get values without the main diagonal (as it is always o)
+    non_diag_values = kl_matrix.to_numpy()[~np.eye(kl_matrix.shape[0], dtype=bool)]
+
+    # Create boxplot
+    plt.figure(figsize=(8, 6))
+    plt.boxplot(non_diag_values, showmeans='True')
+    plt.title('Box and Whiskers Plot (Ignoring Diagonal)')
+    plt.ylabel('Values')
+    plt.grid(True)
+
+    # Show mean and quantiles
+    q010 = np.quantile(non_diag_values, .10)
+    q015 = np.quantile(non_diag_values, .15)
+    q1 = np.quantile(non_diag_values, .25)
+    q2 = np.quantile(non_diag_values, .50)
+    q3 = np.quantile(non_diag_values, .75)
+    plt.text(1, -0.2, f'mean: {np.mean(non_diag_values)}, Q1 {q1}, Q2 {q2}, Q3 {q3} \n Q0.10 {q010}, Q0.15 {q015}', horizontalalignment='center')
+    
     return plt
 
 def get_distribution_comparison(leaks_file='leak_types.txt'):
@@ -350,8 +385,10 @@ def get_distribution_comparison(leaks_file='leak_types.txt'):
     plot_distributions(score_distributions, leak_names, colors).savefig(figures_folder + 'scores_distribution.png')
     # Plot and save the score by length distribution
     plot_scores_by_length(score_length_dataframes, leak_names, colors).savefig(figures_folder + 'scores_length_distribution.png')
-    # Plot and save the kl matrix
+    # Plot and save the kl score matrix
     plot_matrix(kl_df_score.values, leak_names, 'coolwarm').savefig(figures_folder + 'scores_kl_matrix.png')
+    # Get box and whiskers plot for values in the score kl matrix
+    boxwhiskers_from_kl_matrix(kl_df_score).savefig(figures_folder + 'score_boxwhiskers_klmatrix.png')
 
     # For each mask matrix plot
     for item in kl_dfs_mask:
