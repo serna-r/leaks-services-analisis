@@ -300,6 +300,18 @@ def plot_matrix(data, labels, cmap, vmin=0, vmax=2):
 
     return plt
 
+# Unused
+# Plot mask by length and score by length
+def plot_by_length(leak_names, kl_dfs_mask, kl_dfs_score_length):
+        # For each mask length plot matrix
+    for item in kl_dfs_mask:
+        plot_matrix(item[1].values, leak_names, 'coolwarm').savefig(figures_folder + f'mask_length_{item[0]}_kl_matrix.png')
+
+    # For each score and length plot the matrix
+    for item in kl_dfs_score_length:
+        plot_matrix(item[1].values, leak_names, 'coolwarm').savefig(figures_folder + f'score_length_{item[0]}_kl_matrix.png')
+
+
 def boxwhiskers_from_kl_matrix(kl_matrix):
     # Get values without the main diagonal (as it is always o)
     non_diag_values = kl_matrix.to_numpy()[~np.eye(kl_matrix.shape[0], dtype=bool)]
@@ -390,13 +402,6 @@ def get_distribution_comparison(leaks_file='leak_types.txt'):
     # Get box and whiskers plot for values in the score kl matrix
     boxwhiskers_from_kl_matrix(kl_df_score).savefig(figures_folder + 'score_boxwhiskers_klmatrix.png')
 
-    # For each mask matrix plot
-    for item in kl_dfs_mask:
-        plot_matrix(item[1].values, leak_names, 'coolwarm').savefig(figures_folder + f'mask_length_{item[0]}_kl_matrix.png')
-
-    # For each mask matrix plot
-    for item in kl_dfs_score_length:
-        plot_matrix(item[1].values, leak_names, 'coolwarm').savefig(figures_folder + f'score_length_{item[0]}_kl_matrix.png')
 
 if __name__ == '__main__':
     get_distribution_comparison()

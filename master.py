@@ -40,6 +40,9 @@ def process_leaks():
 
         if not data_leak_name.strip():
             continue  # Skip empty lines
+        elif data_leak_name.startswith('#'):
+            print_and_log(f"Skip {data_leak_name.replace('#', '')}", log_file)
+            continue # Skip commented lines
         
         # Mode selection
         mode = None
