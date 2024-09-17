@@ -20,13 +20,13 @@ Instructions to get the extraction and analysis of the data from each leak:<br/>
 Leak.txt file:<br/>
 The file must have leaks separated by newlines, lines starting with '#' are skipped. The leak must be in the following format <leakname> <stat> <extraction mode> , for example:<br/>
 
-linkedin leak
-#mate1
-myheritage simple_entropy
-sharethis password_score_and_length extract_hex
-#shein
+linkedin leak<br/>
+#mate1<br/>
+myheritage simple_entropy<br/>
+sharethis password_score_and_length extract_hex<br/>
+#shein<br/>
 
-<br/><br/>
+<br/>
 Distribution comparison:<br/>
 The distribution comparison creates in the figures folder some graphs to analyze the similitudes between the data leaks, it creates Kullback-Leibler matrices for masks by length, scores by length and global scores, it also creates histograms for scores and scores by length
 <br/>

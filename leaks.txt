@@ -6,5 +6,5 @@
 #linkedin leak
 #mate1
 #myheritage
-sharethis extract_hex
+sharethis password_score_and_length extract_hex
 #shein
