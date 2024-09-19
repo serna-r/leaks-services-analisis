@@ -32,11 +32,13 @@ def process_leaks():
     with open(leak_stats_file, "r") as file:
         leak_names = file.read().splitlines()
 
+    # Log file
+    log_file = 'log.txt'
+
     for data_leak_name in leak_names:
         # Calculate leak start time
         leak_start_time = time.time()
-        # Log file
-        log_file = 'log.txt'
+        
 
         if not data_leak_name.strip():
             continue  # Skip empty lines
@@ -44,17 +46,18 @@ def process_leaks():
             print_and_log(f"Skip {data_leak_name.replace('#', '')}", log_file)
             continue # Skip commented lines
         
+        data_leak_name = data_leak_name.strip()
         # Mode selection
         mode = None
         if data_leak_name.split()[-1] in modes:
             mode = data_leak_name.split()[-1]
-            data_leak_name = data_leak_name.rsplit(' ', 1)[0]
+            data_leak_name = data_leak_name.rsplit(' ', 1)[0].strip()
 
         stat = 'all'
         # Stat selection
         if data_leak_name.split()[-1] in stats:
             stat = data_leak_name.split()[-1]
-            data_leak_name = data_leak_name.rsplit(' ', 1)[0]
+            data_leak_name = data_leak_name.rsplit(' ', 1)[0].strip()
 
         print_and_log(f"Processing data leak: {data_leak_name}, mode: {mode}", log_file)
 

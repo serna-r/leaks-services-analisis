@@ -8,3 +8,8 @@ mate1           social
 myheritage      business
 sharethis       digitaltool
 shein           shopping
+
+dropbox         digitaltool
+dubsmash2      social
+myspace         social
+zynga           games

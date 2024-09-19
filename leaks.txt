@@ -8,8 +8,8 @@
 #myheritage
 #sharethis extract_hex
 #shein
-dropbox only_password
-dubsmash2 only_password
-myspace only_password
-youku only_password
-zynga only_password
+dropbox password_score_and_length only_password
+dubsmash2 password_score_and_length only_password
+myspace password_score_and_length only_password
+youku password_score_and_length only_password
+zynga password_score_and_length only_password
