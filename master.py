@@ -14,7 +14,7 @@ leak_stats_file = "leaks.txt"
 # File for leak distributions
 leak_distribution_file='leak_types.txt'
 # Special extraction modes
-modes = ['extract_hex']
+modes = ['extract_hex', 'only_password']
 # Single stat
 stats = ['simple_entropy', 'shannon_entropy', 'password_strength', 'password_score_and_length']
 
@@ -59,7 +59,7 @@ def process_leaks():
         print_and_log(f"Processing data leak: {data_leak_name}, mode: {mode}", log_file)
 
         # Define the directory path based on the provided name
-        data_leak_dir = os.path.join(os.getcwd(), data_leak_name)
+        data_leak_dir = os.path.join(os.getcwd(), 'leaks/' + data_leak_name)
 
         # Check if the directory exists
         if not os.path.isdir(data_leak_dir):
@@ -88,7 +88,8 @@ def process_leaks():
             print_and_log(str(df), log_file)
 
         # Execute data analysis
-        print_and_log("Executing data analysis...", log_file)
+        if verbose >= 0:
+            print_and_log("Executing data analysis...", log_file)
         start_analysis_time = time.time()  # Start time of analysis
 
         # Check for single stat or all stats

@@ -14,21 +14,25 @@ def read_files_in_folder(folder, mode=None):
 
         if verbose < 0: print('Opening file: ', file_path)
 
+        # Open file
         with open(file_path, 'r', encoding='utf-8') as f:
-            for line in f:
-                email, password = split_email_and_password(line)
-                if email is not None and password is not None:
-                    # Check also for unknown or null passwords
-                    if (password == 'NULL' or password == 'none' or password == '?' 
-                            or password == 'None'):
-                        continue
-                    # If there is a mode selected apply it
-                    if mode != None: password = mode_select(password, mode)
-                    data.append([email, password])
-                    if verbose > 1: print(f"email: {email} password: {password}")
-
+            # If the mode is only password there is a password per line
+            if mode == 'only_password': data = [line.strip() for line in f if line.strip()]
+            # Else separate
+            else: 
+                for line in f:
+                    email, password = split_email_and_password(line)
+                    if email is not None and password is not None:
+                        # Check also for unknown or null passwords
+                        if (password == 'NULL' or password == 'none' or password == '?' 
+                                or password == 'None'):
+                            continue
+                        # If there is a mode selected apply it
+                        if mode != None: password = mode_select(password, mode)
+                        data.append([password])
+                        if verbose > 1: print(f"email: {email} password: {password}")
     # Create a pandas DataFrame with all the collected data
-    df = pd.DataFrame(data, columns=['User', 'Password'])
+    df = pd.DataFrame(data, columns=['Password'])
     return df
 
 def read_single_file(folder, file_number):
@@ -52,11 +56,11 @@ def read_single_file(folder, file_number):
         for line in f:
             email, password = split_email_and_password(line)
             if email is not None and password is not None:
-                data.append([email, password])
+                data.append([password])
                 if verbose > 1: print(f"email: {email} password: {password}")
         
         # Create a pandas DataFrame
-        df = pd.DataFrame(data, columns=['User', 'Password'])
+        df = pd.DataFrame(data, columns=['Password'])
         return df
     
 def split_email_and_password(string):
