@@ -1,4 +1,4 @@
-bookin only_password
+#bookin
 #canvaleak
 #chegg
 #dubshmash
@@ -8,3 +8,8 @@ bookin only_password
 #myheritage
 #sharethis extract_hex
 #shein
+dropbox only_password
+dubsmash2 only_password
+myspace only_password
+youku only_password
+zynga only_password
