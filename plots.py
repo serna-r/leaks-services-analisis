@@ -198,6 +198,10 @@ def boxwhiskers_from_kl_matrix(kl_matrix):
     plt.ylabel('Values')
     plt.grid(True)
 
+    # Plot points for visualization
+    x = np.random.normal(1, 0.04, size=len(non_diag_values))
+    plt.plot(x, non_diag_values, 'r.', alpha=0.2)
+
     # Show mean and quantiles
     q010 = np.quantile(non_diag_values, .10)
     q015 = np.quantile(non_diag_values, .15)
@@ -205,5 +209,29 @@ def boxwhiskers_from_kl_matrix(kl_matrix):
     q2 = np.quantile(non_diag_values, .50)
     q3 = np.quantile(non_diag_values, .75)
     plt.text(1, -0.2, f'mean: {np.mean(non_diag_values)}, Q1 {q1}, Q2 {q2}, Q3 {q3} \n Q0.10 {q010}, Q0.15 {q015}', horizontalalignment='center')
+    
+    return plt
+
+def boxwhiskers_from_kl_matrices(kl_matrices, labels):
+    # Get values without the main diagonal (as it is always o)
+    values = []
+    for matrix in kl_matrices:
+        non_diag_values = matrix.to_numpy()[~np.eye(matrix.shape[0], dtype=bool)]
+        values.append(non_diag_values)
+    
+
+    # Create boxplot
+    plt.figure(figsize=(8, 6))
+    plt.boxplot(values, showmeans='True')
+    plt.title('Box and Whiskers Plot (Ignoring Diagonal)')
+    plt.ylabel('Values')
+    plt.xticks(np.array([i for i in range(len(labels))]) + 1 , labels, rotation=45, ha='right', fontsize=8)
+    plt.grid(True)
+
+    # Plot points for visualization
+    for i in range(len(labels)):
+        y = values[i]
+        x = np.random.normal(1+i, 0.04, size=len(y))
+        plt.plot(x, y, 'r.', alpha=0.2)
     
     return plt

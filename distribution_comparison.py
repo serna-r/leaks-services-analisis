@@ -4,13 +4,14 @@ import numpy as np
 from scipy.stats import entropy
 import pandas as pd
 import warnings
-from plots import get_colors, plot_distributions, plot_matrix, plot_scores_by_length, boxwhiskers_from_kl_matrix
+from plots import get_colors, plot_distributions, plot_matrix, plot_scores_by_length, boxwhiskers_from_kl_matrix, plot_by_length, boxwhiskers_from_kl_matrices
 
 # Suppress the FutureWarning and the runtime one
 warnings.simplefilter(action='ignore', category=FutureWarning)
 warnings.simplefilter(action='ignore', category=RuntimeWarning)
 
 figures_folder = 'figures/'
+length = False
 
 def get_mask_distribution(data):
     
@@ -183,47 +184,57 @@ def get_distribution_comparison(leaks_file='leak_types.txt'):
             # Get mask distributions
             mask_df = get_mask_distribution(data)
 
+        # Only execute if score by length is needed
         # Define the path to the txt file
-        leak_scores_and_length_file = 'leaks\\' + leak + '\password_score_and_length.txt'
-        score_length_df = get_score_and_length(leak_scores_and_length_file)
+        if length:
+            leak_scores_and_length_file = 'leaks\\' + leak + '\password_score_and_length.txt'
+            score_length_df = get_score_and_length(leak_scores_and_length_file)
+            score_length_dataframes.append(score_length_df)
 
         # Get score counts, probabilities, scores and scores by length
         counts.append(count)
         score_distributions.append(probability)
         mask_dataframes.append(mask_df)
-        score_length_dataframes.append(score_length_df)
     
     # Get the kl matrix for score
     kl_df_score = compute_kl_matrix(score_distributions, leak_names)
     kl_df_score.to_csv('./leaks/kl_df_score.csv')
 
-    # # Unused. Useful to plot by length scores and masks
-    # # Get kl matrix for mask and length
-    # kl_dfs_mask = compute_kl_matrix_dfs(mask_dataframes, leak_names, 'mask')
-
-    # # Get kl matrix for score and length, format np to eliminate np.float values
-    # kl_dfs_score_length = compute_kl_matrix_dfs(score_length_dataframes, leak_names, 'length')
+    # Unused. Useful to plot by length scores and masks
+    if length:
+        # Get kl matrix for mask and length
+        kl_dfs_mask = compute_kl_matrix_dfs(mask_dataframes, leak_names, 'mask')
+        # Get kl matrix for score and length, format np to eliminate np.float values
+        kl_dfs_score_length = compute_kl_matrix_dfs(score_length_dataframes, leak_names, 'length')
+        # Plot matrices
+        plot_by_length(leak_names, kl_dfs_mask, kl_dfs_score_length, figures_folder = 'figures/')
+        # Plot and save the score by length distribution
+        plot_scores_by_length(score_length_dataframes, leak_names, colors).savefig(figures_folder + 'scores_length_distribution.png')
 
     # Get the colors for the plots
     colors = get_colors(leak_types)
 
     # Plot and save the score distributions
     plot_distributions(score_distributions, leak_names, colors).savefig(figures_folder + 'scores_distribution.png')
-    # Plot and save the score by length distribution
-    plot_scores_by_length(score_length_dataframes, leak_names, colors).savefig(figures_folder + 'scores_length_distribution.png')
     # Plot and save the kl score matrix
     plot_matrix(kl_df_score.values, leak_names, 'coolwarm', vmin=0, vmax=1).savefig(figures_folder + 'scores_kl_matrix.png')
     # Get box and whiskers plot for values in the score kl matrix
     boxwhiskers_from_kl_matrix(kl_df_score).savefig(figures_folder + 'score_boxwhiskers_klmatrix.png')
 
+    kl_matrices_categories = []
     # Get stats for each category
     for category in leak_categories:
         # Get the leaks in the category
         leaks_in_category = [name for name, type in leak_types if type == category]
         # Get a dataframe with the kl values of the category
         category_df = kl_df_score[leaks_in_category].loc[leaks_in_category]
+        # Add matrix to category matrices
+        kl_matrices_categories.append(category_df)
         # Plot category matrix
         plot_matrix(category_df.values, leaks_in_category, 'coolwarm', vmin=0, vmax=1).savefig(f'{figures_folder}/c_{category}_scores_kl_matrix.png')
+
+    # Plot box and whiskers for each category
+    boxwhiskers_from_kl_matrices(kl_matrices_categories, leak_categories).savefig(figures_folder + 'categories_boxwhiskers_klmatrices.png')
 
 
 
