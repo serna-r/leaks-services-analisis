@@ -15,7 +15,7 @@
 <h2>Available Options:</h2>
 <ul>
     <li><code>-s --stats</code>: Process leaks and gather statistics (from <code>leaks.txt</code>).</li>
-    <li><code>-d --distributioncomparison</code>: Get distribution comparison (from <code>leak_types.txt</code>). <br/>(Note: Ensure <code>stats.txt</code> and <code>password_score_and_length</code> files are generated or in the correct location.)</li>
+    <li><code>-d --distributioncomparison</code>: Get distribution comparison (from <code>leak_types.txt</code>). <br/>(Note: Ensure <code>stats.txt</code> and <code>password_score_and_length.txt</code> files are generated or in the correct location.)</li>
     <li><code>-h</code> or <code>--help</code>: Display help menu.</li>
 </ul>
 
