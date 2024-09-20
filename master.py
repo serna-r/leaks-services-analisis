@@ -145,9 +145,9 @@ def get_distribution_comparison_with_logging():
 def print_help():
     print("Usage: python master.py [option]")
     print("Options:")
-    print("-s or --stats: Process leaks and gather statistics. (file leaks.txt)")
-    print("-d or --distributioncomparison: Get distribution comparison. (file leak_types.txt)")
-    print("-h or --help: Display this help menu")
+    print("-s --stats: Process leaks and gather statistics. (file leaks.txt)")
+    print("-d --distributioncomparison: Get distribution comparison. (file leak_types.txt)")
+    print("-h --help: Display this help menu")
     print("No option: Display this help menu")
 
 def main():
