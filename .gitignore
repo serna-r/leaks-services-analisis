@@ -36,6 +36,8 @@ source
 
 # Ignorar archivos CSV
 *.csv
+# Incluir matriz kl de scores
+!kl_df_score.csv
 
 # Ignorar scripts de prueba
 tests.py

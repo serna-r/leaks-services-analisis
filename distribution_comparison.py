@@ -195,6 +195,7 @@ def get_distribution_comparison(leaks_file='leak_types.txt'):
     
     # Get the kl matrix for score
     kl_df_score = compute_kl_matrix(score_distributions, leak_names)
+    kl_df_score.to_csv('./leaks/kl_df_score.csv')
 
     # # Unused. Useful to plot by length scores and masks
     # # Get kl matrix for mask and length
@@ -211,9 +212,19 @@ def get_distribution_comparison(leaks_file='leak_types.txt'):
     # Plot and save the score by length distribution
     plot_scores_by_length(score_length_dataframes, leak_names, colors).savefig(figures_folder + 'scores_length_distribution.png')
     # Plot and save the kl score matrix
-    plot_matrix(kl_df_score.values, leak_names, 'coolwarm').savefig(figures_folder + 'scores_kl_matrix.png')
+    plot_matrix(kl_df_score.values, leak_names, 'coolwarm', vmin=0, vmax=1).savefig(figures_folder + 'scores_kl_matrix.png')
     # Get box and whiskers plot for values in the score kl matrix
     boxwhiskers_from_kl_matrix(kl_df_score).savefig(figures_folder + 'score_boxwhiskers_klmatrix.png')
+
+    # Get stats for each category
+    for category in leak_categories:
+        # Get the leaks in the category
+        leaks_in_category = [name for name, type in leak_types if type == category]
+        # Get a dataframe with the kl values of the category
+        category_df = kl_df_score[leaks_in_category].loc[leaks_in_category]
+        # Plot category matrix
+        plot_matrix(category_df.values, leaks_in_category, 'coolwarm', vmin=0, vmax=1).savefig(f'{figures_folder}/c_{category}_scores_kl_matrix.png')
+
 
 
 if __name__ == '__main__':

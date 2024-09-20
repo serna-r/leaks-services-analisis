@@ -4,8 +4,6 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from matplotlib.colors import to_rgba
 
-figures_folder = 'figures/'
-
 # Get diferent colors for each type of service
 def get_colors(leak_types):
     # Base colors for each category using matplotlib colormaps
@@ -127,12 +125,19 @@ def plot_scores_by_length(distributions, names, colors=None):
 def plot_matrix(data, labels, cmap, vmin=0, vmax=2):
     # Get values without the main diagonal (as it is always o)
     non_diag_values = data[~np.eye(data.shape[0], dtype=bool)]
-    # Get quantiles 0.10 and 0.15
-    q1 = np.quantile(non_diag_values, .25)
-    q010 = np.quantile(non_diag_values, .10)
-    q015 = np.quantile(non_diag_values, .15)
+
+    # Get quantiles 0.10 and 0.15 if there is at least one value
+    if len(non_diag_values) > 0:
+        q025 = np.quantile(non_diag_values, .25)
+        q010 = np.quantile(non_diag_values, .10)
+        q015 = np.quantile(non_diag_values, .15)
+    # Else al equal 0
+    else:
+        q025, q015, q010 = 0, 0, 0
+
     # Create plot
-    fig, ax = plt.subplots(figsize=(10, 10))
+    fig_size = 10 + len(labels) * 0.2 if len(labels) > 10 else 10
+    fig, ax = plt.subplots(figsize=(fig_size, fig_size))
     # Set color scale to range from 0 to 2
     cax = ax.matshow(data, cmap=cmap, vmin=vmin, vmax=vmax)
 
@@ -142,12 +147,12 @@ def plot_matrix(data, labels, cmap, vmin=0, vmax=2):
     # Set axis labels
     ax.set_xticks(np.arange(len(labels)))
     ax.set_yticks(np.arange(len(labels)))
-    ax.set_xticklabels(labels, rotation=45, ha="left", rotation_mode="anchor")
-    ax.set_yticklabels(labels)
+    ax.set_xticklabels(labels, rotation=45, ha="left", rotation_mode="anchor", fontsize=min(12, 300 // len(labels)))
+    ax.set_yticklabels(labels, fontsize=min(12, 300 // len(labels)))
 
     # # Add text for quantile explanation
     # plt.text(4, 10, f'Q1 (green) {q1:.5f}, Q0.15 (yellow) {q015:.5f}, Q0.10 (red) {q010:.5f}', horizontalalignment='center')
-    ax.set_xlabel(f'Q1 (green) {q1:.5f}, Q0.15 (yellow) {q015:.5f}, Q0.10 (red) {q010:.5f}')
+    ax.set_xlabel(f'Q0.25 (green) {q025:.5f}, Q0.15 (yellow) {q015:.5f}, Q0.10 (red) {q010:.5f}')
 
     # Add top margin
     plt.subplots_adjust(top=0.8)
@@ -160,7 +165,7 @@ def plot_matrix(data, labels, cmap, vmin=0, vmax=2):
                 ax.text(j, i+0.1, '.', ha='center', va='center', color='red', fontsize=20)
             elif i!=j and data[i, j] < q015:
                 ax.text(j, i+0.1, '.', ha='center', va='center', color='yellow', fontsize=20)
-            elif i!=j and data[i, j] < q1:
+            elif i!=j and data[i, j] < q025:
                 ax.text(j, i+0.1, '.', ha='center', va='center', color='green', fontsize=15)
             
 
@@ -172,7 +177,7 @@ def plot_matrix(data, labels, cmap, vmin=0, vmax=2):
 
 # Unused
 # Plot mask by length and score by length
-def plot_by_length(leak_names, kl_dfs_mask, kl_dfs_score_length):
+def plot_by_length(leak_names, kl_dfs_mask, kl_dfs_score_length, figures_folder = 'figures/'):
     # For each mask length plot matrix
     for item in kl_dfs_mask:
         plot_matrix(item[1].values, leak_names, 'coolwarm').savefig(figures_folder + f'mask_length_{item[0]}_kl_matrix.png')

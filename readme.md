@@ -1,47 +1,50 @@
-This the aim of this project is to extract and analyze some quick metrics from data leaks from different services.<br/>
+<h1>Project Overview</h1>
+<p>The aim of this project is to extract and analyze metrics from data leaks across various services. For ethical reasons, data leaks or sources will not be uploaded.</p>
 
-For ethical reasons the data leaks or sources will not be uploaded.<br/>
+<h1>Environment Setup</h1>
+<p>Everything runs in a virtual environment.</p>
 
-Everything runs on virtual enviroment<br/>
+<h1>Instructions for Data Extraction and Analysis</h1>
+<ol>
+    <li>Download the leak data.</li>
+    <li>Place the <code>.txt</code> file in the format <code>user:pass</code> inside a folder named after the leak, in the <code>data</code> subfolder (e.g., <code>./leakname/data</code>).</li>
+    <li>Populate <code>leaks.txt</code> or <code>leak_types.txt</code> with each leak name on a new line.</li>
+    <li>Execute <code>master.py</code> with the desired option: <code>py master.py [option]</code>.</li>
+</ol>
 
-Instructions to get the extraction and analysis of the data from each leak:<br/>
+<h2>Available Options:</h2>
+<ul>
+    <li><code>1</code>: Process leaks and gather statistics (from <code>leaks.txt</code>).</li>
+    <li><code>2</code>: Get distribution comparison (from <code>leak_types.txt</code>). <br/>(Note: Ensure <code>stats.txt</code> and <code>password_score_and_length</code> files are generated or in the correct location.)</li>
+    <li><code>-h</code> or <code>--help</code>: Display help menu.</li>
+</ul>
 
-1. Download leak data
-2. Place the txt in format user:pass in the folder with the name of the leak and inside folder data
-    In the form "./leakname/data"
-3. Populate leaks.txt or leak_types.txt with each leakname in a newline
-4. Execute master.py
-5. Choose option:
-    1. Process leaks and gather statistics. (file leaks.txt)
-    2. Get distribution comparison. (file leak_types.txt) --------- (the files stats.txt and password_score_and_length must have been generated or placed in the correct place)
-    3. Exit.
+<h1>Format for <code>leaks.txt</code></h1>
+<p>Each line should be in the format: <code>&lt;leakname&gt; &lt;stat&gt; &lt;extraction mode&gt;</code>. Lines starting with <code>#</code> are ignored. Example:</p>
+<pre>
+linkedin leak
+#mate1
+myheritage simple_entropy
+sharethis password_score_and_length extract_hex
+#shein
+</pre>
 
-<br/><br/>
-Leak.txt file:<br/>
-The file must have leaks separated by newlines, lines starting with '#' are skipped. The leak must be in the following format <leakname> <stat> <extraction mode> , for example:<br/>
+<h1>Distribution Comparison</h1>
+<p>This generates graphs in the <code>figures</code> folder to analyze similarities between data leaks. It creates Kullback-Leibler matrices for masks by length, scores by length, and global scores, along with histograms for scores and scores by length.</p>
 
-linkedin leak<br/>
-#mate1<br/>
-myheritage simple_entropy<br/>
-sharethis password_score_and_length extract_hex<br/>
-#shein<br/>
+<h1>Metrics Description</h1>
+<ul>
+    <li><strong>Mask</strong>: Password mask format in <code>luds</code> (l = lower, u = upper, d = decimal, s = special).</li>
+    <li><strong>Length</strong>: Length of the password.</li>
+    <li><strong>Simple Entropy</strong>: <code>E = L × log(R) / log(2)</code>.</li>
+    <li><strong>Shannon Entropy</strong>: <code>H(X) = - Σ [p(x) * log2(p(x))]</code>.</li>
+    <li><strong>Commonness</strong>: Indicates if the password is among the 100 most common.</li>
+    <li><strong>Score</strong>: Zxcvbn score.</li>
+    <li><strong>Guesses</strong>: Zxcvbn guess estimates.</li>
+</ul>
 
-<br/>
-Distribution comparison:<br/>
-The distribution comparison creates in the figures folder some graphs to analyze the similitudes between the data leaks, it creates Kullback-Leibler matrices for masks by length, scores by length and global scores, it also creates histograms for scores and scores by length
-<br/>
+<h1>Extraction Modes</h1>
+<p>Specific databases may have unique formats for usernames and passwords (e.g., passwords coded as <code>$HEX["ascii code"]</code>). New modes must be added to <code>dataextract</code> and referenced in <code>master.py</code>. Specify the mode in <code>leaks.txt</code> as follows: <code>sharethis extract_hex</code>.</p>
 
-Stats:<br/>
-    - Mask: password mask format in luds format (l for lower, u for upper, d for decimal, s for special)<br/>
-    - Length<br/>
-    - simpleentropy: E = L × log(R) / log(2)<br/>
-    - shannonentropy: H(X) = - Σ [p(x) * log2(p(x))] <br/>
-    - Is common if the password is in the list of the 100 most common passwords<br/>
-    - Score in zxcvbn<br/>
-    - Guesses in zxcvbn<br/>
-
-Extraction modes:<br/>
-    Some specific data bases have special formats for users and passwords, for example some of them have some passwords coded as $HEX["ascii code"], the new mode code has to be added to dataextract and the name added to master. The mode is then selected adding the name given to the mode after the leakname in leaks.txt (such as sharethis extract_hex) <br/>
-
-Single stats:<br/>
-    Sometimes it is not needed to use all stats, instead adding the name of the stat following the leak name calculates the single stat needed. The current implementation works for simple_entropy, shannon_entropy, password_strength, password_score_and_length.<br/>
+<h1>Single Stats</h1>
+<p>If only a specific stat is needed, append the stat name after the leak name in <code>leaks.txt</code>. Supported stats include: <code>simple_entropy</code>, <code>shannon_entropy</code>, <code>password_strength</code>, and <code>password_score_and_length</code>.</p>

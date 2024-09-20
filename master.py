@@ -1,4 +1,5 @@
 import os
+import sys
 import time  # Import the time module
 from dataextract import read_files_in_folder
 from dataanalisis import statistics
@@ -138,27 +139,36 @@ def get_distribution_comparison_with_logging():
     elapsed_time = end_time - start_time
 
     print_and_log(f"Distribution comparison completed successfully.", log_file)
+    print_and_log("Graphs saved in figures folder", log_file)
     print_and_log(f"Elapsed time for distribution comparison: {elapsed_time:.2f} seconds.\n", log_file)
 
+def print_help():
+    print("Usage: python master.py [option]")
+    print("Options:")
+    print("-s or --stats: Process leaks and gather statistics. (file leaks.txt)")
+    print("-d or --distributioncomparison: Get distribution comparison. (file leak_types.txt)")
+    print("-h or --help: Display this help menu")
+    print("No option: Display this help menu")
 
-def menu():
-    while True:
-        print("\nMenu:")
-        print("1. Process leaks and gather statistics. (file leaks.txt)")
-        print("2. Get distribution comparison. (file leak_types.txt)")
-        print("3. Exit.")
-
-        choice = input("Enter your choice (1/2/3): ")
-
-        if choice == '1':
+def main():
+    if len(sys.argv) == 1:
+        # No arguments provided, show help
+        print_help()
+    elif len(sys.argv) == 2:
+        option = sys.argv[1]
+        
+        if option in ['-s', '--stats']:
             process_leaks()
-        elif choice == '2':
+        elif option in ['-d', '--distributioncomparison']:
             get_distribution_comparison_with_logging()
-        elif choice == '3':
-            print("Exiting the program.")
-            break
+        elif option in ['-h', '--help']:
+            print_help()
         else:
-            print("Invalid choice. Please try again.")
+            print("Invalid option. Please try again.")
+            print_help()
+    else:
+        print("Invalid usage. Please use only one argument.")
+        print_help()
 
 if __name__ == "__main__":
-    menu()
+    main()
