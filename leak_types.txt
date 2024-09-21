@@ -13,3 +13,10 @@ dropbox         digitaltool
 dubsmash2      social
 myspace         social
 zynga           games
+
+cashcrate       business
+clearvoicesurveys business
+gigasize        business
+gogogames       games
+kickstarter     business
+lekologames     games

@@ -8,8 +8,15 @@
 #myheritage
 #sharethis extract_hex
 #shein
-dropbox password_score_and_length only_password
-dubsmash2 password_score_and_length only_password
-myspace password_score_and_length only_password
-youku password_score_and_length only_password
-zynga password_score_and_length only_password
+#dropbox password_score_and_length only_password
+#dubsmash2 password_score_and_length only_password
+#myspace password_score_and_length only_password
+#youku password_score_and_length only_password
+#zynga password_score_and_length only_password
+#cashcrate
+#clearvoicesurveys
+#gigasize
+#gogogames
+#kickstarter
+#lekologames
+loginlive
