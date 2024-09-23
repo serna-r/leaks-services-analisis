@@ -24,9 +24,10 @@ def get_colors(leak_types):
         'games': 0
     }
     
-    colors = []
+    # Colors for leaks
+    colors_leaks = []
         
-        # For each line in the file
+    # For each line in the file give a color for a leak
     for leak in leak_types:
         category = leak[-1]  # The category is the second item of the dict
         
@@ -38,9 +39,23 @@ def get_colors(leak_types):
         color = colormap(category_count[category] / len([l for l in leak_types if category in l]))  # Normalized brightness level
         
         # Append the color
-        colors.append(to_rgba(color))
+        colors_leaks.append(to_rgba(color))
+
+    # colors_categories
+    colors_categories = []
+
+    # Get a color for each category
+    for category in category_count:
+        # Get colormap
+        colormap = base_colors[category]
+        # Select color in the middle
+        color = colormap(0.99)
+        
+        # Append the color
+        colors_categories.append(color)
     
-    return colors
+    
+    return colors_leaks, colors_categories
             
 
 def plot_distributions(distributions, names, colors=None):
@@ -195,6 +210,7 @@ def boxwhiskers_from_kl_matrix(kl_matrix):
     plt.figure(figsize=(8, 6))
     plt.boxplot(non_diag_values, showmeans='True')
     plt.title('Box and Whiskers Plot (Ignoring Diagonal)')
+    plt.xticks([1],['All kl values'])
     plt.ylabel('Values')
     plt.grid(True)
 
@@ -208,17 +224,16 @@ def boxwhiskers_from_kl_matrix(kl_matrix):
     q1 = np.quantile(non_diag_values, .25)
     q2 = np.quantile(non_diag_values, .50)
     q3 = np.quantile(non_diag_values, .75)
-    plt.text(1, -0.2, f'mean: {np.mean(non_diag_values)}, Q1 {q1}, Q2 {q2}, Q3 {q3} \n Q0.10 {q010}, Q0.15 {q015}', horizontalalignment='center')
+    plt.text(1, -0.25, f'mean: {np.mean(non_diag_values)}, Q1 {q1:.5f}, Q2 {q2:.5f}, Q3 {q3:.5f} \n Q0.10 {q010:.5f}, Q0.15 {q015:.5f}', horizontalalignment='center')
     
     return plt
 
-def boxwhiskers_from_kl_matrices(kl_matrices, labels):
+def boxwhiskers_from_kl_matrices(kl_matrices, labels, colors=None):
     # Get values without the main diagonal (as it is always o)
     values = []
     for matrix in kl_matrices:
         non_diag_values = matrix.to_numpy()[~np.eye(matrix.shape[0], dtype=bool)]
         values.append(non_diag_values)
-    
 
     # Create boxplot
     plt.figure(figsize=(8, 6))
@@ -232,6 +247,28 @@ def boxwhiskers_from_kl_matrices(kl_matrices, labels):
     for i in range(len(labels)):
         y = values[i]
         x = np.random.normal(1+i, 0.04, size=len(y))
-        plt.plot(x, y, 'r.', alpha=0.2)
+        plt.plot(x, y, '.', alpha=0.5, color=colors[i] if colors else None)
+    
+    return plt
+
+def random_scatterplot_klmatrices(kl_matrices, labels, colors = None):
+    # Get values without the main diagonal (as it is always o)
+    values = []
+    for matrix in kl_matrices:
+        non_diag_values = matrix.to_numpy()[~np.eye(matrix.shape[0], dtype=bool)]
+        values.append(non_diag_values)
+
+    # Create boxplot
+    plt.figure(figsize=(8, 6))
+    plt.title('Categories Scatterplot (Ignoring Diagonal)')
+    plt.ylabel('Values')
+    plt.xticks(np.array([i for i in range(len(labels))]) + 1 , labels, rotation=45, ha='right', fontsize=8)
+    plt.grid(True)
+
+    # Plot points for visualization
+    for i in range(len(labels)):
+        y = values[i]
+        x = np.random.normal(1+i, 0.04, size=len(y))
+        plt.plot(x, y, '.', alpha=0.5, color=colors[i] if colors else None)
     
     return plt

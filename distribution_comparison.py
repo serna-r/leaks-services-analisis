@@ -4,7 +4,7 @@ import numpy as np
 from scipy.stats import entropy
 import pandas as pd
 import warnings
-from plots import get_colors, plot_distributions, plot_matrix, plot_scores_by_length, boxwhiskers_from_kl_matrix, plot_by_length, boxwhiskers_from_kl_matrices
+from plots import get_colors, plot_distributions, plot_matrix, plot_scores_by_length, boxwhiskers_from_kl_matrix, plot_by_length, boxwhiskers_from_kl_matrices, random_scatterplot_klmatrices
 
 # Suppress the FutureWarning and the runtime one
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -162,8 +162,9 @@ def get_distribution_comparison(leaks_file='leak_types.txt'):
     # Get names list
     leak_names = [leak_name for leak_name, _ in leak_types]
   
-    # Get unique categories
-    leak_categories = set([leak_type for _, leak_type in leak_types])
+    # Get unique categories and order them
+    leak_categories = list(set([leak_type for _, leak_type in leak_types]))
+    leak_categories.sort()
 
     # Variable to store probability distributions
     counts = []
@@ -200,6 +201,9 @@ def get_distribution_comparison(leaks_file='leak_types.txt'):
     kl_df_score = compute_kl_matrix(score_distributions, leak_names)
     kl_df_score.to_csv('./leaks/kl_df_score.csv')
 
+    # Get the colors for the plots
+    colors_leaks, colors_categories = get_colors(leak_types)
+
     # Unused. Useful to plot by length scores and masks
     if length:
         # Get kl matrix for mask and length
@@ -209,17 +213,17 @@ def get_distribution_comparison(leaks_file='leak_types.txt'):
         # Plot matrices
         plot_by_length(leak_names, kl_dfs_mask, kl_dfs_score_length, figures_folder = 'figures/')
         # Plot and save the score by length distribution
-        plot_scores_by_length(score_length_dataframes, leak_names, colors).savefig(figures_folder + 'scores_length_distribution.png')
+        plot_scores_by_length(score_length_dataframes, leak_names, colors_leaks).savefig(figures_folder + 'scores_length_distribution.png')
 
-    # Get the colors for the plots
-    colors = get_colors(leak_types)
 
     # Plot and save the score distributions
-    plot_distributions(score_distributions, leak_names, colors).savefig(figures_folder + 'scores_distribution.png')
+    plot_distributions(score_distributions, leak_names, colors_leaks).savefig(figures_folder + 'scores_distribution.png')
     # Plot and save the kl score matrix
     plot_matrix(kl_df_score.values, leak_names, 'coolwarm', vmin=0, vmax=1).savefig(figures_folder + 'scores_kl_matrix.png')
     # Get box and whiskers plot for values in the score kl matrix
     boxwhiskers_from_kl_matrix(kl_df_score).savefig(figures_folder + 'score_boxwhiskers_klmatrix.png')
+    # Get scatter from values
+    random_scatterplot_klmatrices([kl_df_score], ['All values']).savefig(figures_folder + 'score_scatter_klmatrix.png')
 
     kl_matrices_categories = []
     # Get stats for each category
@@ -234,7 +238,9 @@ def get_distribution_comparison(leaks_file='leak_types.txt'):
         plot_matrix(category_df.values, leaks_in_category, 'coolwarm', vmin=0, vmax=1).savefig(f'{figures_folder}/c_{category}_scores_kl_matrix.png')
 
     # Plot box and whiskers for each category
-    boxwhiskers_from_kl_matrices(kl_matrices_categories, leak_categories).savefig(figures_folder + 'categories_boxwhiskers_klmatrices.png')
+    boxwhiskers_from_kl_matrices(kl_matrices_categories, leak_categories, colors_categories).savefig(figures_folder + 'categories_boxwhiskers_klmatrices.png')
+    # Scatterplot without box whiskers
+    random_scatterplot_klmatrices(kl_matrices_categories, leak_categories, colors_categories).savefig(figures_folder + 'categories_scatter_klmatrices.png')
 
 
 
