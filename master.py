@@ -1,6 +1,7 @@
 import os
 import sys
-import time  # Import the time module
+import time
+import traceback
 from dataextract import read_files_in_folder
 from dataanalisis import statistics
 from dataanalisis import one_stat
@@ -44,6 +45,7 @@ def process_leaks():
         except Exception as e:
             # Log the exception and continue with the next leak
             print_and_log(f"Error processing data leak {data_leak_name}: {e}", log_file)
+            print_and_log(f"Error trace:\n {traceback.format_exc()}")
             continue  # Skip to the next leak
 
     # Calculate the total elapsed time for all leaks
