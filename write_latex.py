@@ -62,7 +62,7 @@ def get_latex_table(output_path):
 
 if __name__ == '__main__':
     # Define the output path for the LaTeX table
-    output_path = 'distribution_resume_table.tex'
+    output_path = 'latex/distribution_resume_table.tex'
     
     # Generate the LaTeX table
     get_latex_table(output_path)
