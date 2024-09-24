@@ -24,8 +24,7 @@ def calculate_mean_score(probability_dist):
     mean_score = sum(score * prob for score, prob in zip(scores, probability_dist))
     return mean_score
 
-def get_latex_table(output_path):
-    leaks_file='leak_types.txt'
+def get_latex_table(leaks_file, output_path):
     # Get leaks
     leak_types = get_leak_types(leaks_file)
     
@@ -64,5 +63,7 @@ if __name__ == '__main__':
     # Define the output path for the LaTeX table
     output_path = 'latex/distribution_resume_table.tex'
     
+    leaks_file='leak_types.txt'
+    
     # Generate the LaTeX table
-    get_latex_table(output_path)
+    get_latex_table(leaks_file ,output_path)

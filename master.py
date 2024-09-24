@@ -163,7 +163,7 @@ def get_latex_with_logging():
 
     # Generate the LaTeX table
     output_path = 'latex/distribution_resume_table.tex'
-    get_latex_table(output_path)
+    get_latex_table(leak_distribution_file ,output_path)
 
     # End time for the process
     end_time = time.time()

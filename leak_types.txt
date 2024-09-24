@@ -1,9 +1,9 @@
 bookin          business
-canvaleak       digitaltool
+canva       digitaltool
 chegg           digitaltool
 dubshmash       social
 hautelook       shopping
-linkedin leak   social
+linkedin   social
 mate1           social
 myheritage      business
 sharethis       digitaltool
