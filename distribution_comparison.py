@@ -2,7 +2,7 @@ import numpy as np
 from scipy.stats import entropy
 import pandas as pd
 import warnings
-from retrieve_stats import get_count_and_probabilities, get_mask_distribution, get_score_and_length
+from retrieve_stats import get_count_and_probabilities, get_mask_distribution, get_score_and_length, get_leak_types
 from plots import get_colors, plot_distributions, plot_matrix, plot_scores_by_length, boxwhiskers_from_kl_matrix, plot_by_length, boxwhiskers_from_kl_matrices, random_scatterplot_klmatrices
 
 # Suppress the FutureWarning and the runtime one
@@ -48,18 +48,7 @@ def compute_kl_matrix_dfs(distributions, names, dropcolumn):
 
 def get_distribution_comparison(leaks_file='leak_types.txt'):
     # Get leaks with categories
-    leak_types = []
-    # Read the leak names from a text file
-    with open(leaks_file, "r") as file:
-        for line in  file.read().splitlines():
-            if not line.strip(): continue  # Skip empty lines
-            elif line.startswith('#'): continue # Skip commented lines
-            parts = line.rsplit(maxsplit=1)  # Split by last space
-            entry_name = parts[0].strip()   # The entry name
-            category = parts[1].strip()     # The category (remaining part of the line)
-
-            # Append entry and category as a tuple to entries list
-            leak_types.append((entry_name, category))
+    leak_types = get_leak_types(leaks_file)
 
     # Sort entries by category name
     leak_types.sort(key=lambda x: x[1])

@@ -45,7 +45,7 @@ def process_leaks():
         except Exception as e:
             # Log the exception and continue with the next leak
             print_and_log(f"Error processing data leak {data_leak_name}: {e}", log_file)
-            print_and_log(f"Error trace:\n {traceback.format_exc()}")
+            print_and_log(f"Error trace:\n {traceback.format_exc()}", log_file)
             continue  # Skip to the next leak
 
     # Calculate the total elapsed time for all leaks

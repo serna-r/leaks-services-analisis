@@ -2,6 +2,23 @@ import re
 from collections import defaultdict
 import pandas as pd
 
+def get_leak_types(leaks_file):
+        # Get leaks with categories
+    leak_types = []
+    # Read the leak names from a text file
+    with open(leaks_file, "r") as file:
+        for line in  file.read().splitlines():
+            if not line.strip(): continue  # Skip empty lines
+            elif line.startswith('#'): continue # Skip commented lines
+            parts = line.rsplit(maxsplit=1)  # Split by last space
+            entry_name = parts[0].strip()   # The entry name
+            category = parts[1].strip()     # The category (remaining part of the line)
+
+            # Append entry and category as a tuple to entries list
+            leak_types.append((entry_name, category))
+
+    return leak_types
+
 def get_mask_distribution(data):
     
     # Get the file split in lines
@@ -51,11 +68,16 @@ def get_mask_distribution(data):
     # Eliminate the column total which is always 100, and return it
     return df.drop(columns=['total'])
 
-def get_count_and_probabilities(data):
-
+def get_count(data):
     # Extract total users read
     total_users_match = re.search(r"Total users read: (\d+)", data)
     total_users = int(total_users_match.group(1)) if total_users_match else None
+
+    return total_users
+
+def get_count_and_probabilities(data):
+
+    total_users = get_count(data)
 
     # Extract score distribution
     score_distribution = defaultdict(int)
@@ -95,3 +117,25 @@ def get_score_and_length(file_path):
 
     # Return the obtained df
     return df
+
+def get_password_length_mean(data):
+    # Find the Password Length Distribution section
+    length_dist_section = re.search(r"Password Length Distribution:\nlength\n((?:\d+\s+\d+\n)+)", data)
+    
+    if length_dist_section:
+        length_lines = length_dist_section.group(1).strip().split("\n")
+        lengths = []
+        counts = []
+        for line in length_lines:
+            length, count = map(int, line.split())
+            lengths.append(length)
+            counts.append(count)
+        
+        # Create a DataFrame
+        df = pd.DataFrame({"Length": lengths, "Count": counts})
+        
+        # Calculate the mean length
+        mean_length = (df["Length"] * df["Count"]).sum() / df["Count"].sum()
+        return mean_length
+    else:
+        return None
