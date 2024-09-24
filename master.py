@@ -5,6 +5,7 @@ import traceback
 from dataextract import read_files_in_folder
 from dataanalisis import statistics
 from dataanalisis import one_stat
+from write_latex import get_latex_table
 from datetime import datetime
 
 # Assuming get_distribution_comparison is imported
@@ -153,11 +154,33 @@ def get_distribution_comparison_with_logging():
     print_and_log("Graphs saved in figures folder", log_file)
     print_and_log(f"Elapsed time for distribution comparison: {elapsed_time:.2f} seconds.\n", log_file)
 
+def get_latex_with_logging():
+    log_file = 'log.txt'
+
+    # Start time for the latex file generation
+    start_time = time.time()
+    print_and_log("Starting latex file generation ...", log_file)
+
+    # Generate the LaTeX table
+    output_path = 'latex/distribution_resume_table.tex'
+    get_latex_table(output_path)
+
+    # End time for the process
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+
+    print_and_log(f"Latex file generation completed successfully.", log_file)
+    print_and_log("File saved in latex folder", log_file)
+    print_and_log(f"Elapsed time for latex file generation: {elapsed_time:.2f} seconds.\n", log_file)
+
+
 def print_help():
     print("Usage: python master.py [option]")
     print("Options:")
     print("-s --stats: Process leaks and gather statistics. (file leaks.txt)")
     print("-d --distributioncomparison: Get distribution comparison. (file leak_types.txt)")
+    print("-l --latex: Make a latex file in the latex folder with important data (file leak_types.txt)")
+    print("-c --cluster: Execute the cluster module")
     print("-h --help: Display this help menu")
     print("No option: Display this help menu")
 
@@ -172,6 +195,11 @@ def main():
             process_leaks()
         elif option in ['-d', '--distributioncomparison']:
             get_distribution_comparison_with_logging()
+        elif option in ['-l', '--latex']:
+            get_latex_with_logging()
+        elif option in ['-c', '--cluster']:
+            # TO-DO
+            print("TO-DO")
         elif option in ['-h', '--help']:
             print_help()
         else:
