@@ -195,11 +195,11 @@ def plot_matrix(data, labels, cmap, vmin=0, vmax=2):
 def plot_by_length(leak_names, kl_dfs_mask, kl_dfs_score_length, figures_folder = 'figures/'):
     # For each mask length plot matrix
     for item in kl_dfs_mask:
-        plot_matrix(item[1].values, leak_names, 'coolwarm').savefig(figures_folder + f'mask_length_{item[0]}_kl_matrix.png')
+        plot_matrix(item[1].values, leak_names, 'coolwarm').savefig(figures_folder + f'klmatrices/mask_length_{item[0]}_kl_matrix.png')
 
     # For each score and length plot the matrix
     for item in kl_dfs_score_length:
-        plot_matrix(item[1].values, leak_names, 'coolwarm').savefig(figures_folder + f'score_length_{item[0]}_kl_matrix.png')
+        plot_matrix(item[1].values, leak_names, 'coolwarm').savefig(figures_folder + f'klmatrices/score_length_{item[0]}_kl_matrix.png')
 
 
 def boxwhiskers_from_kl_matrix(kl_matrix):

@@ -38,13 +38,8 @@ def group_by_category(leak_list, key_index):
         category_dict[item[key_index]].append(item[0])
     return category_dict
 
-def get_elbow_kmeans(leaks_file):
+def get_elbow_kmeans(leak_names, leak_probabilities):
     """Function to print the sse for each value of k"""
-    # Get leak names
-    leak_types = get_leak_types(leaks_file)
-    leak_types.sort(key=lambda x: x[1])
-    # Get names and probabilities
-    leak_names, leak_probabilities = get_leaks_and_probabilities(leak_types)
 
     number_leaks = len(leak_names)
 
@@ -69,12 +64,7 @@ def get_elbow_kmeans(leaks_file):
     plt.ylabel("SSE")
     return number_leaks, plt
 
-def execute_kmeans(leaks_file, k):
-    # Get leak names
-    leak_types = get_leak_types(leaks_file)
-    leak_types.sort(key=lambda x: x[1])
-    # Get names and probabilities
-    leak_names, leak_probabilities = get_leaks_and_probabilities(leak_types)
+def execute_kmeans(leak_types, leak_names, leak_probabilities, k):
 
     # Initiate kmeans
     kmeans = KMeans(
@@ -110,7 +100,7 @@ def execute_kmeans(leaks_file, k):
 
 def plot_kmeans(data, sse):
     # Sort data by category
-    data_sorted = sorted(data, key=lambda x: x[1])
+    data_sorted = sorted(data, key=lambda x: x[0][0])
 
     # Extract sorted labels, categories, and values
     labels = [f"{entry[0][0]} ({entry[0][1]})" for entry in data_sorted]  # Individual (Category)
@@ -146,19 +136,29 @@ def plot_kmeans(data, sse):
     plt.tight_layout()
     return plt
 
-if __name__ == '__main__':
-    # Leaks file
-    leaks_file='leak_types.txt'
-
+def clustering(leaks_file):
+    # Get leak names
+    leak_types = get_leak_types(leaks_file)
+    leak_types.sort(key=lambda x: x[1])
+    # Get names and probabilities
+    leak_names, leak_probabilities = get_leaks_and_probabilities(leak_types)
     # Get elbow for kmeans
-    number_leaks, elbowplot = get_elbow_kmeans(leaks_file)
+    number_leaks, elbowplot = get_elbow_kmeans(leak_names, leak_probabilities)
     # Save elbow figure
     elbowplot.savefig('./figures/kmeans/elbow.png')
 
     for i in range (1, int(number_leaks/2)):
         # Execute k means
-        sse, kmeans_data = execute_kmeans(leaks_file, k=i)
+        sse, kmeans_data = execute_kmeans(leak_types, leak_names, leak_probabilities, k=i)
 
         # Plot kmeans
         plot_kmeans(kmeans_data, sse).savefig(f'./figures/kmeans/kmeans_k{i}.png')
+
+
+if __name__ == '__main__':
+    # Leaks file
+    leaks_file='leak_types.txt'
+
+    clustering(leaks_file)
+    
 
