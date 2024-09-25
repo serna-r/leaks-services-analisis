@@ -6,6 +6,7 @@ from dataextract import read_files_in_folder
 from dataanalisis import statistics
 from dataanalisis import one_stat
 from write_latex import get_latex_table
+from clustering import clustering
 from datetime import datetime
 
 # Assuming get_distribution_comparison is imported
@@ -173,6 +174,25 @@ def get_latex_with_logging():
     print_and_log("File saved in latex folder", log_file)
     print_and_log(f"Elapsed time for latex file generation: {elapsed_time:.2f} seconds.\n", log_file)
 
+def get_cluster_with_logging():
+    log_file = 'log.txt'
+
+    # Start time for the latex file generation
+    start_time = time.time()
+    print_and_log("Starting clustering ...", log_file)
+
+    # Call cluster function
+    leaks_file='leak_types.txt'
+    clustering(leaks_file)
+
+    # End time for the process
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+
+    print_and_log(f"Clustering completed successfully.", log_file)
+    print_and_log("Graphs saved in figures folder", log_file)
+    print_and_log(f"Elapsed time for clustering: {elapsed_time:.2f} seconds.\n", log_file)
+
 
 def print_help():
     print("Usage: python master.py [option]")
@@ -198,8 +218,7 @@ def main():
         elif option in ['-l', '--latex']:
             get_latex_with_logging()
         elif option in ['-c', '--cluster']:
-            # TO-DO
-            print("TO-DO")
+            get_cluster_with_logging()
         elif option in ['-h', '--help']:
             print_help()
         else:
