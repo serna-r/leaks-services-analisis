@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.colors import to_rgba
 
 # Get diferent colors for each type of service
@@ -272,3 +273,104 @@ def random_scatterplot_klmatrices(kl_matrices, labels, colors = None):
         plt.plot(x, y, '.', alpha=0.5, color=colors[i] if colors else None)
     
     return plt
+
+def plot_kmeans(data, sse):
+    # Sort data by category
+    data_sorted = sorted(data, key=lambda x: x[0][0])
+
+    # Extract sorted labels, categories, and values
+    labels = [f"{entry[0][0]} ({entry[0][1]})" for entry in data_sorted]  # Individual (Category)
+    categories_list = [entry[1] for entry in data_sorted]  # Category numbers
+    values = [entry[2] for entry in data_sorted]  # The 5 values for each individual
+
+    # Convert the list of values into a numpy array for easier plotting
+    values = np.array(values)
+
+    # Dynamically generate colors for the categories
+    unique_categories = sorted(set(categories_list))  # Find unique categories and sort them
+    colors = plt.get_cmap('tab10', len(unique_categories))  # Use a colormap with the number of unique categories
+    category_colors = {category: colors(i) for i, category in enumerate(unique_categories)}  # Assign a color to each category
+
+    # Create the plot
+    fig, ax = plt.subplots(figsize=(12, 7))
+
+    # Create a stacked bar for each category
+    bottom = np.zeros(len(values))  # To start stacking from 0 for each individual
+
+    for i in range(values.shape[1]):  # Iterate over the 5 values per individual
+        color_list = [category_colors[cat] for cat in categories_list]  # Color depends on category
+        ax.bar(labels, values[:, i], bottom=bottom, color=color_list, edgecolor='white')
+        bottom += values[:, i]  # Update bottom for the next stacked value
+
+    # Add labels and title
+    ax.set_xlabel(f'Services, SSE = {sse}')
+    ax.set_ylabel('Distribution')
+    ax.set_title('Distribution of Categories Across Services (Ordered by K means label)')
+
+    # Show the plot
+    plt.xticks(rotation=90)
+    plt.tight_layout()
+    return plt
+
+def plot_5d_scatter(labels, data, categories=None, centroids=None):
+    
+    # Convert to numpy array for easier indexing
+    data = np.array(data)
+
+    # Extract the first three dimensions for x, y, z
+    x = data[:, 0]
+    y = data[:, 1]
+    z = data[:, 2]
+
+    # Use the 4th dimension to represent color
+    color = data[:, 3]
+
+    # Use the 5th dimension to represent size (scaled for better visualization)
+    size = data[:, 4] * 1000  # Adjust scaling factor if needed
+
+    fig = plt.figure(figsize=(7, 7), dpi=300)
+    ax = fig.add_subplot(111, projection='3d')
+
+    # Set color for categories if necesarie
+    if categories:
+        unique_categories = sorted(set(categories))
+        num_categories = len(set(categories))
+        # Get distinct colors for each category (using a colormap)
+        colors = plt.get_cmap('Set1', num_categories)
+        category_colors = {category: colors(i) for i, category in enumerate(unique_categories)}   # Assign a color to each category
+
+    # Create the scatter plot, with size and color representing the 4th and 5th dimensions
+    if categories:
+        vmax = max(color)
+        vmin = min(color)
+        for i in range(len(x)):
+            ax.scatter(x[i], y[i], z[i], c=color[i], s=size[i], cmap='viridis', alpha=0.7,
+                    edgecolors=category_colors[categories[i]], linewidth=1.2, vmax=vmax, vmin=vmin)
+
+        # Add a color bar to show the scale of the 4th dimension (color)
+        scatter = ax.scatter([], [], [], c=[], cmap='viridis')  # Dummy scatter for the colorbar
+        colorbar = plt.colorbar(scatter, location='left', fraction=0.03, pad=0.03)
+
+        if centroids.any():
+            for i, centroid in enumerate(centroids):
+                ax.scatter(centroid[0],centroid[1], centroid[2], c=[centroid[3]], s=(centroid[4]* 1000), cmap='viridis', alpha=0.7,
+                        linewidth=1.2, marker='+', vmax=vmax, vmin=vmin)
+    else:
+        scatter = ax.scatter(x, y, z, c=color, s=size, cmap='viridis', alpha=0.7)
+        # Add a color bar to show the scale of the 4th dimension (color)
+        colorbar = plt.colorbar(scatter, location='left', fraction=0.03, pad=0.03)
+
+
+
+    # Set axis labels
+    ax.set_xlabel('Score 0')
+    ax.set_ylabel('Score 1')
+    ax.set_zlabel('Score 2')
+    colorbar.set_label('Score 3')
+
+    # Add labels next to each point
+    for i, label in enumerate(labels):
+        ax.text(x[i], y[i], z[i], label, fontsize=3, color='black')
+
+    return plt
+    

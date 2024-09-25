@@ -6,6 +6,7 @@ import numpy as np
 from collections import defaultdict
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
+from plots import plot_kmeans, plot_5d_scatter
 from retrieve_stats import get_count_and_probabilities, get_leak_types
 
 verbose = 0
@@ -52,14 +53,14 @@ def get_elbow_kmeans(leak_names, leak_probabilities):
    
     # A list holds the SSE values for each k
     sse = []
-    for k in range(1, number_leaks):
+    for k in range(2, number_leaks):
         kmeans = KMeans(n_clusters=k, **kmeans_kwargs)
         kmeans.fit(leak_probabilities)
         sse.append(kmeans.inertia_)
 
     plt.style.use("fivethirtyeight")
-    plt.plot(range(1, number_leaks), sse)
-    plt.xticks(range(1, number_leaks))
+    plt.plot(range(2, number_leaks), sse)
+    plt.xticks(range(2, number_leaks))
     plt.xlabel("Number of Clusters")
     plt.ylabel("SSE")
     return number_leaks, plt
@@ -94,47 +95,13 @@ def execute_kmeans(leak_types, leak_names, leak_probabilities, k):
         for label, names in kmeans_grouped.items():
             print(f"{label}: {', '.join(names)}")
 
+    # Get sse
     sse = kmeans.inertia_
+    # Get centroids
+    centroids = kmeans.cluster_centers_
     # Return leakname with category, kmeans label and probabilities
-    return sse, list(zip(leak_types, kmeans.labels_.tolist(), leak_probabilities))
+    return sse, list(zip(leak_types, kmeans.labels_.tolist(), leak_probabilities)), centroids
 
-def plot_kmeans(data, sse):
-    # Sort data by category
-    data_sorted = sorted(data, key=lambda x: x[0][0])
-
-    # Extract sorted labels, categories, and values
-    labels = [f"{entry[0][0]} ({entry[0][1]})" for entry in data_sorted]  # Individual (Category)
-    categories_list = [entry[1] for entry in data_sorted]  # Category numbers
-    values = [entry[2] for entry in data_sorted]  # The 5 values for each individual
-
-    # Convert the list of values into a numpy array for easier plotting
-    values = np.array(values)
-
-    # Dynamically generate colors for the categories
-    unique_categories = sorted(set(categories_list))  # Find unique categories and sort them
-    colors = plt.get_cmap('tab10', len(unique_categories))  # Use a colormap with the number of unique categories
-    category_colors = {category: colors(i) for i, category in enumerate(unique_categories)}  # Assign a color to each category
-
-    # Create the plot
-    fig, ax = plt.subplots(figsize=(12, 7))
-
-    # Create a stacked bar for each category
-    bottom = np.zeros(len(values))  # To start stacking from 0 for each individual
-
-    for i in range(values.shape[1]):  # Iterate over the 5 values per individual
-        color_list = [category_colors[cat] for cat in categories_list]  # Color depends on category
-        ax.bar(labels, values[:, i], bottom=bottom, color=color_list, edgecolor='white')
-        bottom += values[:, i]  # Update bottom for the next stacked value
-
-    # Add labels and title
-    ax.set_xlabel(f'Services, SSE = {sse}')
-    ax.set_ylabel('Distribution')
-    ax.set_title('Distribution of Categories Across Services (Ordered by K means label)')
-
-    # Show the plot
-    plt.xticks(rotation=90)
-    plt.tight_layout()
-    return plt
 
 def clustering(leaks_file):
     # Get leak names
@@ -142,17 +109,26 @@ def clustering(leaks_file):
     leak_types.sort(key=lambda x: x[1])
     # Get names and probabilities
     leak_names, leak_probabilities = get_leaks_and_probabilities(leak_types)
+    # Plot 4d scatter of the leaks
+    plot_5d_scatter(leak_names, leak_probabilities).savefig("./figures/scatter/services_5d_scatter.png")
+    plt.close()
     # Get elbow for kmeans
     number_leaks, elbowplot = get_elbow_kmeans(leak_names, leak_probabilities)
     # Save elbow figure
     elbowplot.savefig('./figures/kmeans/elbow.png')
+    plt.close()
 
-    for i in range (1, int(number_leaks/2)):
+    for i in range (2, int(number_leaks/2)):
         # Execute k means
-        sse, kmeans_data = execute_kmeans(leak_types, leak_names, leak_probabilities, k=i)
+        sse, kmeans_data, centroids = execute_kmeans(leak_types, leak_names, leak_probabilities, k=i)
+
+        categories = [data[1] for data in kmeans_data]
+        plot_5d_scatter(leak_names, leak_probabilities, categories, centroids).savefig(f"./figures/kmeans/services_5d_scatter_{i}.png")
+        plt.close()
 
         # Plot kmeans
         plot_kmeans(kmeans_data, sse).savefig(f'./figures/kmeans/kmeans_k{i}.png')
+        plt.close()
 
 
 if __name__ == '__main__':
