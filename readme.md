@@ -16,6 +16,8 @@
 <ul>
     <li><code>-s --stats</code>: Process leaks and gather statistics (from <code>leaks.txt</code>).</li>
     <li><code>-d --distributioncomparison</code>: Get distribution comparison (from <code>leak_types.txt</code>). <br/>(Note: Ensure <code>stats.txt</code> and <code>password_score_and_length.txt</code> files are generated or in the correct location.)</li>
+    <li><code>-l --latex</code>: Make a latex file in the latex folder with important data (file leak_types.txt)</li>
+    <li><code>-c --cluster</code>: Execute the cluster module</li>
     <li><code>-h --help</code>: Display help menu.</li>
 </ul>
 
