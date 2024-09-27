@@ -19,4 +19,4 @@ clearvoicesurveys business
 gigasize        business
 gogogames       games
 kickstarter     business
-lekologames     games
+lekoolgames     games

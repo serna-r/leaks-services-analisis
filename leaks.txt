@@ -18,5 +18,5 @@
 #gigasize
 #gogogames
 #kickstarter
-#lekologames
+#lekoolgames
 loginlive
