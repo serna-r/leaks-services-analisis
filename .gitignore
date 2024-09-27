@@ -24,6 +24,8 @@ __pycache__/
 !shannon_entropy.txt
 # Excluir tipos de leaks
 !leak_types.txt
+# Excluir los txt de cluster evaluation
+!*cluster_evaluation.txt
 
 # Ignorar todos los archivos de Excel
 *.xlsx

@@ -1,15 +1,15 @@
-from sklearn.datasets import make_blobs
-from sklearn.metrics import silhouette_score
-from sklearn.preprocessing import StandardScaler
-
 import numpy as np
 from collections import defaultdict
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
+from sklearn.metrics import silhouette_score
+from sklearn.metrics import pairwise_distances
 from plots import plot_kmeans, plot_5d_scatter
 from retrieve_stats import get_count_and_probabilities, get_leak_types
 
 verbose = 0
+OUTPUTFOLDER = './clusters/'
+
 
 def get_leaks_and_probabilities(leak_types):
     # Lists for returning
@@ -127,7 +127,7 @@ def get_kmeans(leak_names, leak_types,  leak_probabilities):
         plot_kmeans(kmeans_data, sse).savefig(f'./figures/kmeans/kmeans_k{i}.png')
         plt.close()
 
-def manual_cluster(leak_types):
+def manual_cluster_labels(leak_types):
     # Get unique categories and map each to an integer
     unique_categories = sorted(set([leak[1] for leak in leak_types]))
     category_to_label = {category: idx for idx, category in enumerate(unique_categories)}
@@ -137,39 +137,113 @@ def manual_cluster(leak_types):
     
     return numerical_labels, category_to_label
 
+class ClusterEvaluation:
+    def __init__(self, leak_names, numerical_labels, leak_probabilities):
+        self.leak_names = leak_names
+        self.numerical_labels = numerical_labels
+        self.leak_probabilities = leak_probabilities
+        self.k = len(set(numerical_labels))  # Number of clusters
+        self.n = len(leak_names)  # Total number of data points
+        self.d = len(leak_probabilities[0])  # Dimensionality (number of features per point)
 
-def cluster_evaluation(numerical_labels, leak_probabilities):
-    # Group the leak probabilities by their numerical label
-    clusters = defaultdict(list)
-    
-    for i, label in enumerate(numerical_labels):
-        clusters[label].append(leak_probabilities[i])
-    
-    # Calculate the centroid for each cluster
-    centroids = {label: np.mean(probs, axis=0) for label, probs in clusters.items()}
-    
-    # Calculate the overall mean of the dataset
-    all_data_points = [prob for probs in leak_probabilities for prob in probs]
-    overall_mean = np.mean(all_data_points, axis=0)
-    
-    # Sum of Squared Within (SSW)
-    ssw = 0
-    for label, probs in clusters.items():
-        centroid = centroids[label]
-        for prob in probs:
-            ssw += np.sum((prob - centroid) ** 2)
-    
-    # Sum of Squared Between (SSB)
-    ssb = 0
-    for label, probs in clusters.items():
-        centroid = centroids[label]
-        n_j = len(probs)
-        ssb += n_j * np.sum((centroid - overall_mean) ** 2)
+    def evaluate(self):
+        # Calculate SSW, SSB, and centroids
+        self.ssw, self.ssb, self.centroids = self.calculate_ssw_ssb()
 
-    # Create centroids as array to return
-    centroids_list = np.asarray([centroids[i].tolist() for i in range(len(centroids))])
+        # Calculate all indices
+        self.ball_hall = self.ball_hall_index()
+        self.calinski_harabasz = self.calinski_harabasz_index()
+        self.hartigan = self.hartigan_index()
+        self.davies_bouldin = self.davies_bouldin_index()
+        self.silhouette = self.silhouette_index()
+
+        return {
+            'Ball-Hall': self.ball_hall,
+            'Calinski-Harabasz': self.calinski_harabasz,
+            'Hartigan': self.hartigan,
+            'Davies-Bouldin': self.davies_bouldin,
+            'Silhouette': self.silhouette
+        }
+
+    def calculate_ssw_ssb(self):
+        # Group leak probabilities by their cluster label
+        clusters = defaultdict(list)
+
+        for i, label in enumerate(self.numerical_labels):
+            clusters[label].append(self.leak_probabilities[i])
+
+        # Calculate the centroid for each cluster
+        centroids = {label: np.mean(probs, axis=0) for label, probs in clusters.items()}
+
+        # Calculate the overall mean of the dataset
+        all_data_points = np.vstack(self.leak_probabilities)
+        overall_mean = np.mean(all_data_points, axis=0)
+
+        # Sum of Squared Within (SSW)
+        ssw = 0
+        for label, probs in clusters.items():
+            centroid = centroids[label]
+            for prob in probs:
+                ssw += np.sum((prob - centroid) ** 2)
+
+        # Sum of Squared Between (SSB)
+        ssb = 0
+        for label, probs in clusters.items():
+            centroid = centroids[label]
+            n_j = len(probs)  # Number of points in the cluster
+            ssb += n_j * np.sum((centroid - overall_mean) ** 2)
+
+        centroids_array = np.array([centroids[i] for i in range(self.k)])
+        return ssw, ssb, centroids_array
+
+    # Ball-Hall index (1965)
+    def ball_hall_index(self):
+        return self.ssw / self.k
+
+    # Calinski-Harabasz index (1974)
+    def calinski_harabasz_index(self):
+        return (self.ssb / (self.k - 1)) / (self.ssw / (self.n - self.k))
+
+    # Hartigan index (1975)
+    def hartigan_index(self):
+        return np.log(self.ssb / self.ssw)
+
+    # Davies-Bouldin index
+    def davies_bouldin_index(self):
+        intra_distances = np.zeros(self.k)
+        centroid_distances = pairwise_distances(self.centroids)
+
+        for i in range(self.k):
+            cluster_points = np.array([self.leak_probabilities[j] for j in range(self.n) if self.numerical_labels[j] == i])
+            if len(cluster_points) > 0:
+                intra_distances[i] = np.mean(np.linalg.norm(cluster_points - self.centroids[i], axis=1))
+
+        db_index = 0
+        for i in range(self.k):
+            max_ratio = 0
+            for j in range(self.k):
+                if i != j:
+                    ratio = (intra_distances[i] + intra_distances[j]) / centroid_distances[i, j]
+                    max_ratio = max(max_ratio, ratio)
+            db_index += max_ratio
+
+        return db_index / self.k
+
+    # Silhouette index
+    def silhouette_index(self):
+        return silhouette_score(self.leak_probabilities, self.numerical_labels)
+
+    # Method to pretty print all the calculated indices
+    def __str__(self):
+        return (f"Cluster Evaluation Indices:\n"
+                f"SSW: {self.ssw}, SSB: {self.ssb}\n"
+                f"Ball-Hall Index: {self.ball_hall:.4f}\n"
+                f"Calinski-Harabasz Index: {self.calinski_harabasz:.4f}\n"
+                f"Hartigan Index: {self.hartigan:.4f}\n"
+                f"Davies-Bouldin Index: {self.davies_bouldin:.4f}\n"
+                f"Silhouette Index: {self.silhouette:.4f}")
+
     
-    return ssw, ssb, centroids_list
 
 def clustering(leaks_file, kmeans=False):
     # Get leak names
@@ -181,25 +255,33 @@ def clustering(leaks_file, kmeans=False):
     plot_5d_scatter(leak_names, leak_probabilities).savefig("./figures/scatter/services_5d_scatter.png")
     plt.close()
 
-    # If needed apply kmeans
+    # If needed apply kmeans to get the best k
     if kmeans: get_kmeans(leak_names, leak_types, leak_probabilities)
 
     # Get numerical labels for each category
-    numerical_labels, category_to_label = manual_cluster(leak_types)
-    print(f"Labels for each category:\n{category_to_label}")
+    numerical_labels, category_to_label = manual_cluster_labels(leak_types)
+    print(f"Labels for each category:\n{category_to_label}\n")
     # Call manual clustering
-    ssw, ssb, centroids = cluster_evaluation(numerical_labels, leak_probabilities)
+    manualCluster = ClusterEvaluation(leak_names, numerical_labels, leak_probabilities)
+    manualCluster.evaluate()
     # Print measures
-    print(f"Manual Measures SSW: {ssw} , SSB: {ssb}")
-
+    print(f"Manual Measures")
+    print(manualCluster, "\n")
+    # Save indexes in file
+    with open(OUTPUTFOLDER + 'manualcluster_evaluation.txt', 'w') as f: f.write(str(manualCluster))
     # Plot manual cluster
     plot_5d_scatter(leak_names, leak_probabilities, numerical_labels).savefig("./figures/scatter/services_5d_manualcluster_scatter.png")
     plt.close()
 
     # Execute kmeans 5
-    sse, cluster_list, centroidsK = execute_kmeans(leak_types, leak_names, leak_probabilities, 5)
-    ssw2, ssb2, centroids2 = cluster_evaluation([item[1] for item in cluster_list], [item[2] for item in cluster_list])
-    print(f"Kmeans Measures SSW: {ssw2} , SSB: {ssb2}")
+    sse, cluster_list, centroidsKmeans = execute_kmeans(leak_types, leak_names, leak_probabilities, 5)
+    kmeans5Cluster = ClusterEvaluation(leak_names, [item[1] for item in cluster_list], leak_probabilities)
+    kmeans5Cluster.evaluate()
+    print(f"Kmeans 5 Measures")
+    print(kmeans5Cluster, "\n")
+    # Save indexes in file
+    with open(OUTPUTFOLDER + 'kmeans5cluster_evaluation.txt', 'w') as f: f.write(str(kmeans5Cluster))
+
 
 if __name__ == '__main__':
     # Leaks file
