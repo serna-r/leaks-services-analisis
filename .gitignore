@@ -29,6 +29,8 @@ __pycache__/
 
 # Ignorar todos los archivos de Excel
 *.xlsx
+# No ignorar el excel de services
+!/services/services.xlsx
 
 # Ignorar archivos source
 source
@@ -40,6 +42,8 @@ source
 *.csv
 # Incluir matriz kl de scores
 !kl_df_score.csv
+# Incluir datos de servicios
+!servicestypesum.csv
 
 # Ignorar scripts de prueba
 tests.py
