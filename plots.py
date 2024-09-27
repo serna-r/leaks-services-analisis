@@ -351,7 +351,7 @@ def plot_5d_scatter(labels, data, categories=None, centroids=None):
         scatter = ax.scatter([], [], [], c=[], cmap='viridis')  # Dummy scatter for the colorbar
         colorbar = plt.colorbar(scatter, location='left', fraction=0.03, pad=0.03)
 
-        if centroids.any():
+        if centroids != None:
             for i, centroid in enumerate(centroids):
                 ax.scatter(centroid[0],centroid[1], centroid[2], c=[centroid[3]], s=(centroid[4]* 1000), cmap='viridis', alpha=0.7,
                         linewidth=1.2, marker='+', vmax=vmax, vmin=vmin)

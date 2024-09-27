@@ -127,6 +127,50 @@ def get_kmeans(leak_names, leak_types,  leak_probabilities):
         plot_kmeans(kmeans_data, sse).savefig(f'./figures/kmeans/kmeans_k{i}.png')
         plt.close()
 
+def manual_cluster(leak_types):
+    # Get unique categories and map each to an integer
+    unique_categories = sorted(set([leak[1] for leak in leak_types]))
+    category_to_label = {category: idx for idx, category in enumerate(unique_categories)}
+    
+    # Replace the category in leak_types with its corresponding integer label
+    numerical_labels = [category_to_label[category] for _, category in leak_types]
+    
+    return numerical_labels, category_to_label
+
+
+def cluster_evaluation(numerical_labels, leak_probabilities):
+    # Group the leak probabilities by their numerical label
+    clusters = defaultdict(list)
+    
+    for i, label in enumerate(numerical_labels):
+        clusters[label].append(leak_probabilities[i])
+    
+    # Calculate the centroid for each cluster
+    centroids = {label: np.mean(probs, axis=0) for label, probs in clusters.items()}
+    
+    # Calculate the overall mean of the dataset
+    all_data_points = [prob for probs in leak_probabilities for prob in probs]
+    overall_mean = np.mean(all_data_points, axis=0)
+    
+    # Sum of Squared Within (SSW)
+    ssw = 0
+    for label, probs in clusters.items():
+        centroid = centroids[label]
+        for prob in probs:
+            ssw += np.sum((prob - centroid) ** 2)
+    
+    # Sum of Squared Between (SSB)
+    ssb = 0
+    for label, probs in clusters.items():
+        centroid = centroids[label]
+        n_j = len(probs)
+        ssb += n_j * np.sum((centroid - overall_mean) ** 2)
+
+    # Create centroids as array to return
+    centroids_list = np.asarray([centroids[i].tolist() for i in range(len(centroids))])
+    
+    return ssw, ssb, centroids_list
+
 def clustering(leaks_file, kmeans=False):
     # Get leak names
     leak_types = get_leak_types(leaks_file)
@@ -140,8 +184,13 @@ def clustering(leaks_file, kmeans=False):
     # If needed apply kmeans
     if kmeans: get_kmeans(leak_names, leak_types, leak_probabilities)
 
-
-    
+    # Get numerical labels for each category
+    numerical_labels, category_to_label = manual_cluster(leak_types)
+    print(f"Labels for each category:\n{category_to_label}")
+    # Call manual clustering
+    ssw, ssb, centroids = cluster_evaluation(numerical_labels, leak_probabilities)
+    plot_5d_scatter(leak_names, leak_probabilities, numerical_labels).savefig("./figures/scatter/services_5d_manualcluster_scatter.png")
+    print(f"Measures SSW: {ssw} , SSB: {ssb}")
 
 
 if __name__ == '__main__':
