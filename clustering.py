@@ -2,9 +2,9 @@ import numpy as np
 from collections import defaultdict
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
-from sklearn.metrics import silhouette_score
+import matplotlib.cm as cm
+from sklearn.metrics import silhouette_score, silhouette_samples
 from sklearn.metrics import davies_bouldin_score
-from sklearn.metrics import pairwise_distances
 from plots import plot_kmeans, plot_5d_scatter
 from retrieve_stats import get_count_and_probabilities, get_leak_types
 
@@ -156,7 +156,7 @@ class ClusterEvaluation:
         self.calinski_harabasz = self.calinski_harabasz_index()
         self.hartigan = self.hartigan_index()
         self.davies_bouldin = self.davies_bouldin_index()
-        self.silhouette = self.silhouette_index()
+        self.silhouette, self.silhouette_values = self.silhouette_index_and_values()
 
         return {
             'Ball-Hall': self.ball_hall,
@@ -217,8 +217,44 @@ class ClusterEvaluation:
         return db_index
 
     # Silhouette index
-    def silhouette_index(self):
-        return silhouette_score(self.leak_probabilities, self.numerical_labels)
+    def silhouette_index_and_values(self):
+        silhouette_index = silhouette_score(self.leak_probabilities, self.numerical_labels)
+        silhouette_values = silhouette_samples(self.leak_probabilities, self.numerical_labels)
+        return silhouette_index, silhouette_values 
+    
+    def plot_silhouette(self):
+        # Convert numerical_labels to NumPy array for easier handling
+        cluster_labels = np.array(self.numerical_labels)
+
+        # Create a color map with distinct colors for each cluster
+        colors = cm.get_cmap("tab10", self.k)  # Use a predefined color map with distinct colors
+
+        # Create a figure and axis for the plot
+        fig, ax = plt.subplots(figsize=(10, 7))
+
+        # Create grid
+        plt.grid()
+
+        # Sort silhouette values for better visualization
+        y_positions = np.arange(len(self.silhouette_values))  # One bar for each service
+
+        # Plot a bar for each silhouette score
+        for i in range(self.n):
+            cluster = cluster_labels[i]
+            ax.barh(y_positions[i], self.silhouette_values[i], color=colors(cluster), edgecolor='black')
+
+        # Set labels and title
+        ax.set_yticks(y_positions)
+        ax.set_yticklabels(self.leak_names)  # Use leak names as labels for each bar
+        ax.set_xlabel("Silhouette Score")
+        ax.set_ylabel("Services (Leaks)")
+        ax.set_title("Silhouette Plot for Each Service by Cluster")
+
+        # Display the plot
+        plt.tight_layout()
+
+        # Return plot
+        return plt
 
     # Method to pretty print all the calculated indices
     def __str__(self):
@@ -251,6 +287,7 @@ def clustering(leaks_file, kmeans=False):
     # Call manual clustering
     manualCluster = ClusterEvaluation(leak_names, numerical_labels, leak_probabilities)
     manualCluster.evaluate()
+    manualCluster.plot_silhouette().savefig("./figures/bars/silohuetteManual.png")
     # Print measures
     print(f"Manual Measures")
     print(manualCluster, "\n")
@@ -264,6 +301,7 @@ def clustering(leaks_file, kmeans=False):
     sse, cluster_list, centroidsKmeans = execute_kmeans(leak_types, leak_names, leak_probabilities, 5)
     kmeans5Cluster = ClusterEvaluation(leak_names, [item[1] for item in cluster_list], leak_probabilities)
     kmeans5Cluster.evaluate()
+    kmeans5Cluster.plot_silhouette().savefig("./figures/bars/silohuetteKmeans5.png")
     print(f"Kmeans 5 Measures")
     print(kmeans5Cluster, "\n")
     # Save indexes in file
