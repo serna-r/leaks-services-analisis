@@ -189,9 +189,17 @@ def clustering(leaks_file, kmeans=False):
     print(f"Labels for each category:\n{category_to_label}")
     # Call manual clustering
     ssw, ssb, centroids = cluster_evaluation(numerical_labels, leak_probabilities)
-    plot_5d_scatter(leak_names, leak_probabilities, numerical_labels).savefig("./figures/scatter/services_5d_manualcluster_scatter.png")
-    print(f"Measures SSW: {ssw} , SSB: {ssb}")
+    # Print measures
+    print(f"Manual Measures SSW: {ssw} , SSB: {ssb}")
 
+    # Plot manual cluster
+    plot_5d_scatter(leak_names, leak_probabilities, numerical_labels).savefig("./figures/scatter/services_5d_manualcluster_scatter.png")
+    plt.close()
+
+    # Execute kmeans 5
+    sse, cluster_list, centroidsK = execute_kmeans(leak_types, leak_names, leak_probabilities, 5)
+    ssw2, ssb2, centroids2 = cluster_evaluation([item[1] for item in cluster_list], [item[2] for item in cluster_list])
+    print(f"Kmeans Measures SSW: {ssw2} , SSB: {ssb2}")
 
 if __name__ == '__main__':
     # Leaks file
