@@ -3,6 +3,7 @@ from collections import defaultdict
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 from sklearn.metrics import silhouette_score
+from sklearn.metrics import davies_bouldin_score
 from sklearn.metrics import pairwise_distances
 from plots import plot_kmeans, plot_5d_scatter
 from retrieve_stats import get_count_and_probabilities, get_leak_types
@@ -210,24 +211,10 @@ class ClusterEvaluation:
 
     # Davies-Bouldin index
     def davies_bouldin_index(self):
-        intra_distances = np.zeros(self.k)
-        centroid_distances = pairwise_distances(self.centroids)
-
-        for i in range(self.k):
-            cluster_points = np.array([self.leak_probabilities[j] for j in range(self.n) if self.numerical_labels[j] == i])
-            if len(cluster_points) > 0:
-                intra_distances[i] = np.mean(np.linalg.norm(cluster_points - self.centroids[i], axis=1))
-
-        db_index = 0
-        for i in range(self.k):
-            max_ratio = 0
-            for j in range(self.k):
-                if i != j:
-                    ratio = (intra_distances[i] + intra_distances[j]) / centroid_distances[i, j]
-                    max_ratio = max(max_ratio, ratio)
-            db_index += max_ratio
-
-        return db_index / self.k
+        # Call sklearn library
+        db_index = davies_bouldin_score(self.leak_probabilities, self.numerical_labels)
+        # Return value
+        return db_index
 
     # Silhouette index
     def silhouette_index(self):
