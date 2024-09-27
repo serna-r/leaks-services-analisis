@@ -2,7 +2,7 @@ import re
 from collections import defaultdict
 import pandas as pd
 
-def get_leak_types(leaks_file):
+def get_leak_types(leaks_file, dates=False):
         # Get leaks with categories
     leak_types = []
     # Read the leak names from a text file
@@ -11,11 +11,15 @@ def get_leak_types(leaks_file):
             if not line.strip(): continue  # Skip empty lines
             elif line.startswith('#'): continue # Skip commented lines
             parts = line.rsplit(maxsplit=1)  # Split by last space
-            entry_name = parts[0].strip()   # The entry name
-            category = parts[1].strip()     # The category (remaining part of the line)
+            date = parts[1].strip() # The last string is the date
+            parts2 = parts[0].rsplit(maxsplit=1)
+            entry_name = parts2[0].strip()   # The entry name
+            category = parts2[1].strip()     # The category (remaining part of the line)
 
             # Append entry and category as a tuple to entries list
-            leak_types.append((entry_name, category))
+            if not dates : leak_types.append((entry_name, category))
+            # If dates requested
+            elif dates: leak_types.append((entry_name, category, date))
 
     return leak_types
 

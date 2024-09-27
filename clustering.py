@@ -39,6 +39,12 @@ def group_by_category(leak_list, key_index):
         category_dict[item[key_index]].append(item[0])
     return category_dict
 
+def get_centroids(leak_types):
+    centroids = []
+
+    return centroids
+
+
 def get_elbow_kmeans(leak_names, leak_probabilities):
     """Function to print the sse for each value of k"""
 
@@ -102,16 +108,7 @@ def execute_kmeans(leak_types, leak_names, leak_probabilities, k):
     # Return leakname with category, kmeans label and probabilities
     return sse, list(zip(leak_types, kmeans.labels_.tolist(), leak_probabilities)), centroids
 
-
-def clustering(leaks_file):
-    # Get leak names
-    leak_types = get_leak_types(leaks_file)
-    leak_types.sort(key=lambda x: x[1])
-    # Get names and probabilities
-    leak_names, leak_probabilities = get_leaks_and_probabilities(leak_types)
-    # Plot 4d scatter of the leaks
-    plot_5d_scatter(leak_names, leak_probabilities).savefig("./figures/scatter/services_5d_scatter.png")
-    plt.close()
+def get_kmeans(leak_names, leak_types,  leak_probabilities):
     # Get elbow for kmeans
     number_leaks, elbowplot = get_elbow_kmeans(leak_names, leak_probabilities)
     # Save elbow figure
@@ -129,6 +126,22 @@ def clustering(leaks_file):
         # Plot kmeans
         plot_kmeans(kmeans_data, sse).savefig(f'./figures/kmeans/kmeans_k{i}.png')
         plt.close()
+
+def clustering(leaks_file, kmeans=False):
+    # Get leak names
+    leak_types = get_leak_types(leaks_file)
+    leak_types.sort(key=lambda x: x[1])
+    # Get names and probabilities
+    leak_names, leak_probabilities = get_leaks_and_probabilities(leak_types)
+    # Plot 4d scatter of the leaks
+    plot_5d_scatter(leak_names, leak_probabilities).savefig("./figures/scatter/services_5d_scatter.png")
+    plt.close()
+
+    # If needed apply kmeans
+    if kmeans: get_kmeans(leak_names, leak_types, leak_probabilities)
+
+
+    
 
 
 if __name__ == '__main__':
