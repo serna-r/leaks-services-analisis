@@ -16,7 +16,7 @@ zynga           games 01/09/2019
 
 cashcrate       business 17/11/2016
 clearvoicesurveys business 01/10/2019
-gigasize        business None
-gogames       games None
+gigasize        business Unknown
+gogames       games Unknown
 kickstarter     business 16/02/2014
-lekoolgames     games None
+lekoolgames     games Unknown
