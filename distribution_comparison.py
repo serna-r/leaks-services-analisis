@@ -1,3 +1,6 @@
+import matplotlib.pyplot as plt
+from datetime import datetime
+
 import numpy as np
 from scipy.stats import entropy
 import pandas as pd
@@ -45,10 +48,50 @@ def compute_kl_matrix_dfs(distributions, names, dropcolumn):
 
     return kl_matrices
 
+def plot_by_year(score_distributions, leak_names, colors_leaks, dates_list):
+    # Create a dictionary to store data by year
+    data_by_year = {}
+    
+    # Iterate through the dates list and organize data by year
+    for i, date in enumerate(dates_list):
+        try:
+            # Convert the date string to a datetime object
+            year = datetime.strptime(date, "%d/%m/%Y").year
+        except ValueError:
+            # Handle unknown dates, assign them to an "Unknown" category
+            year = "Unknown"
+        
+        # Add the data to the respective year in the dictionary
+        if year not in data_by_year:
+            data_by_year[year] = {"distributions": [], "leak_names": [], "colors": []}
+        data_by_year[year]["distributions"].append(score_distributions[i])
+        data_by_year[year]["leak_names"].append(leak_names[i])
+        data_by_year[year]["colors"].append(colors_leaks[i])
+
+    # Plot for each year
+    for year, data in data_by_year.items():
+        plt.figure(figsize=(10, 6))
+        index = np.arange(len(data["leak_names"]))
+        
+        # Plot each leak as a separate bar in a stacked bar chart
+        for j, score_distribution in enumerate(data["distributions"]):
+            plt.bar(index, score_distribution, color=data["colors"][j], label=data["leak_names"][j])
+
+        # Add title, labels, and legend
+        plt.title(f"Data Breaches in {year}")
+        plt.xlabel("Leaks")
+        plt.ylabel("Score Distribution")
+        plt.xticks(index, data["leak_names"], rotation=90)
+        plt.legend(loc="best")
+        plt.tight_layout()
+        
+        # Show the plot for the current year
+        plt.show()
+
 
 def get_distribution_comparison(leaks_file='leak_types.txt'):
     # Get leaks with categories
-    leak_types = get_leak_types(leaks_file)
+    leak_types, dates_list = get_leak_types(leaks_file, dates=True)
 
     # Sort entries by category name
     leak_types.sort(key=lambda x: x[1])
@@ -136,6 +179,7 @@ def get_distribution_comparison(leaks_file='leak_types.txt'):
     # Scatterplot without box whiskers
     random_scatterplot_klmatrices(kl_matrices_categories, leak_categories, colors_categories).savefig(figures_folder + 'scatter/categories_scatter_klmatrices.png')
 
+    print(score_distributions, leak_names, colors_leaks, dates_list)
 
 
 if __name__ == '__main__':

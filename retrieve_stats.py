@@ -3,8 +3,9 @@ from collections import defaultdict
 import pandas as pd
 
 def get_leak_types(leaks_file, dates=False):
-        # Get leaks with categories
+    # Get leaks with categories
     leak_types = []
+    if dates: dates_list = []
     # Read the leak names from a text file
     with open(leaks_file, "r") as file:
         for line in  file.read().splitlines():
@@ -17,10 +18,16 @@ def get_leak_types(leaks_file, dates=False):
             category = parts2[1].strip()     # The category (remaining part of the line)
 
             # Append entry and category as a tuple to entries list
-            if not dates : leak_types.append((entry_name, category))
+            leak_types.append((entry_name, category))
             # If dates requested
-            elif dates: leak_types.append((entry_name, category, date))
+            if dates: 
+                dates_list.append(date)
 
+    # If dates needed return them
+    if dates: 
+        return leak_types, dates_list
+
+    # Else retun only leak types
     return leak_types
 
 def get_mask_distribution(data):
