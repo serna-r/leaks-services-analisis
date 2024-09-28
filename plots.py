@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.colors import to_rgba
+from datetime import datetime
 
 # Get diferent colors for each type of service
 def get_colors(leak_types):
@@ -59,26 +60,57 @@ def get_colors(leak_types):
     return colors_leaks, colors_categories
             
 
-def plot_distributions(distributions, names, colors=None):
+def plot_distributions(distributions, names, colors=None, year=None):
     num_distributions = len(distributions)
-    num_categories = len(distributions[0])
+    num_categories = len(distributions[0])  # Each distribution has 5 score categories
     
-    x = np.arange(num_categories)  # Category positions for x-axis
-    bar_width = 0.8 / num_distributions
-    
+    # Positions for the bars
+    x = np.arange(num_categories)  # Category positions on the x-axis
+    bar_width = 0.8 / num_distributions  # Width of each bar
+
     plt.figure(figsize=(12, 6))
     
     for i, distribution in enumerate(distributions):
-        # Plot the bar with the appropiate color if it is specified
-        plt.bar(x + i * bar_width, distribution, bar_width, label=names[i], color=colors[i] if colors else None)
+        plt.bar(
+            x + i * bar_width,  # Shift each service's bars to the right
+            distribution, 
+            bar_width, 
+            label=names[i],  # Use the service's name as the label
+            color=colors[i] if colors else None  # Use provided colors, if any
+        )
     
-    plt.xlabel('Scores zxcvbn')
+    plt.xlabel('Scores (zxcvbn)')
     plt.ylabel('Probability')
-    plt.title('Probability Distributions')
+
+    if year != None : plt.title(f'Probability Distributions for {year}')
+    else: plt.title(f'Probability Distributions')
+    
+    # Set x-ticks to be centered with proper labels (Score 0, Score 1, ...)
     plt.xticks(x + bar_width * (num_distributions - 1) / 2, [f'Score {i}' for i in range(num_categories)])
-    plt.legend()
+    
+    plt.legend(loc='best')
     plt.tight_layout()
     return plt
+
+def plot_by_year(score_distributions, leak_names, colors_leaks, dates_list):
+    # Organize data by year
+    data_by_year = {}
+    for i, date in enumerate(dates_list):
+        try:
+            year = datetime.strptime(date, "%d/%m/%Y").year
+        except ValueError:
+            year = "Unknown"
+        
+        if year not in data_by_year:
+            data_by_year[year] = {"distributions": [], "leak_names": [], "colors": []}
+        data_by_year[year]["distributions"].append(score_distributions[i])
+        data_by_year[year]["leak_names"].append(leak_names[i])
+        data_by_year[year]["colors"].append(colors_leaks[i])
+
+    # Plot for each year
+    for year, data in data_by_year.items():
+        plot_distributions(data["distributions"], data["leak_names"], data["colors"], year).savefig(f'./figures/years/{year}_year.png')
+
 
 
 def plot_scores_by_length(distributions, names, colors=None):

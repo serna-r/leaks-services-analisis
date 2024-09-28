@@ -1,12 +1,10 @@
 import matplotlib.pyplot as plt
-from datetime import datetime
-
 import numpy as np
 from scipy.stats import entropy
 import pandas as pd
 import warnings
 from retrieve_stats import get_count_and_probabilities, get_mask_distribution, get_score_and_length, get_leak_types
-from plots import get_colors, plot_distributions, plot_matrix, plot_scores_by_length, boxwhiskers_from_kl_matrix, plot_by_length, boxwhiskers_from_kl_matrices, random_scatterplot_klmatrices
+from plots import get_colors, plot_distributions, plot_matrix, plot_scores_by_length, boxwhiskers_from_kl_matrix, plot_by_length, boxwhiskers_from_kl_matrices, random_scatterplot_klmatrices, plot_by_year
 
 # Suppress the FutureWarning and the runtime one
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -47,46 +45,6 @@ def compute_kl_matrix_dfs(distributions, names, dropcolumn):
         kl_matrices.append([(i+5),compute_kl_matrix(length_dist, names)])
 
     return kl_matrices
-
-def plot_by_year(score_distributions, leak_names, colors_leaks, dates_list):
-    # Create a dictionary to store data by year
-    data_by_year = {}
-    
-    # Iterate through the dates list and organize data by year
-    for i, date in enumerate(dates_list):
-        try:
-            # Convert the date string to a datetime object
-            year = datetime.strptime(date, "%d/%m/%Y").year
-        except ValueError:
-            # Handle unknown dates, assign them to an "Unknown" category
-            year = "Unknown"
-        
-        # Add the data to the respective year in the dictionary
-        if year not in data_by_year:
-            data_by_year[year] = {"distributions": [], "leak_names": [], "colors": []}
-        data_by_year[year]["distributions"].append(score_distributions[i])
-        data_by_year[year]["leak_names"].append(leak_names[i])
-        data_by_year[year]["colors"].append(colors_leaks[i])
-
-    # Plot for each year
-    for year, data in data_by_year.items():
-        plt.figure(figsize=(10, 6))
-        index = np.arange(len(data["leak_names"]))
-        
-        # Plot each leak as a separate bar in a stacked bar chart
-        for j, score_distribution in enumerate(data["distributions"]):
-            plt.bar(index, score_distribution, color=data["colors"][j], label=data["leak_names"][j])
-
-        # Add title, labels, and legend
-        plt.title(f"Data Breaches in {year}")
-        plt.xlabel("Leaks")
-        plt.ylabel("Score Distribution")
-        plt.xticks(index, data["leak_names"], rotation=90)
-        plt.legend(loc="best")
-        plt.tight_layout()
-        
-        # Show the plot for the current year
-        plt.show()
 
 
 def get_distribution_comparison(leaks_file='leak_types.txt'):
@@ -178,8 +136,9 @@ def get_distribution_comparison(leaks_file='leak_types.txt'):
     boxwhiskers_from_kl_matrices(kl_matrices_categories, leak_categories, colors_categories).savefig(figures_folder + 'boxwhiskers/categories_boxwhiskers_klmatrices.png')
     # Scatterplot without box whiskers
     random_scatterplot_klmatrices(kl_matrices_categories, leak_categories, colors_categories).savefig(figures_folder + 'scatter/categories_scatter_klmatrices.png')
+    plt.close()
 
-    print(score_distributions, leak_names, colors_leaks, dates_list)
+    plot_by_year(score_distributions, leak_names, colors_leaks, dates_list)
 
 
 if __name__ == '__main__':
