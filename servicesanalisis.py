@@ -15,9 +15,10 @@ def get_data(file):
 def plot_services_sum(distribution, names, title):
     # Create a horizontal bar chart using pyplot
     plt.barh(names, distribution, edgecolor='black')
-
+    # Get mean of non 0 values
+    non0mean = distribution[distribution!= 0].mean()
     # Add titles and labels
-    plt.title("Histogram of Categories and Values")
+    plt.title(f"Categories and Values: {title}, Non 0 mean: {non0mean:.4f}")
     plt.xlabel("Values")
     plt.ylabel("Categories")
 
@@ -36,9 +37,12 @@ def service_analisis(file):
     sumservices = sumservices.groupby(['Type']).sum()
     # Normalize and get important columns
     sumservices.iloc[:, 0:] = sumservices.iloc[:, 0:].div(sumservices['Total'], axis=0)
+    # Eliminate total column
+    sumservices = sumservices.loc[:, sumservices.columns != 'Total']
     # Plot distributions
     for i in range(len(sumservices.index)):
-        plot_services_sum(sumservices.iloc[i, :].values, sumservices.columns, 'Test').savefig(f'./figures/services/{i}.png')
+        category = sumservices.iloc[i].name
+        plot_services_sum(sumservices.iloc[i, :].values, sumservices.columns, category).savefig(f'./figures/services/{category}.png')
         plt.close()
     # Save csv
     sumservices.to_csv('./services/servicestypesum.csv')
