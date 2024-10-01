@@ -72,6 +72,45 @@ def get_elbow_kmeans(leak_names, leak_probabilities):
     plt.ylabel("SSE")
     return number_leaks, plt
 
+def get_silhouette_kmeans(leak_names, leak_probabilities):
+    """
+    Function to plot the silhouette score for different values of k in k-means clustering.
+    
+    Args:
+        leak_names (list): List of leak names (used to determine the number of data points).
+        leak_probabilities (list of list): The feature vectors for clustering.
+    
+    Returns:
+        plt: The silhouette plot for different numbers of clusters.
+    """
+    number_leaks = len(leak_names)
+
+    kmeans_kwargs = {
+        "init": "random",
+        "n_init": 10,
+        "max_iter": 300,
+        "random_state": 42,
+    }
+    
+    # A list holds the silhouette score values for each k
+    silhouette_scores = []
+    for k in range(2, number_leaks):
+        kmeans = KMeans(n_clusters=k, **kmeans_kwargs)
+        kmeans.fit(leak_probabilities)
+        score = silhouette_score(leak_probabilities, kmeans.labels_)
+        silhouette_scores.append(score)
+    
+    # Plotting the silhouette scores for each k
+    plt.style.use("fivethirtyeight")
+    plt.plot(range(2, number_leaks), silhouette_scores)
+    plt.xticks(range(2, number_leaks))
+    plt.xlabel("Number of Clusters")
+    plt.ylabel("Silhouette Score")
+    plt.title("Silhouette Score for KMeans Clustering")
+
+    # Return plot
+    return plt
+
 def execute_kmeans(leak_types, leak_names, leak_probabilities, k):
 
     # Initiate kmeans
@@ -112,8 +151,12 @@ def execute_kmeans(leak_types, leak_names, leak_probabilities, k):
 def get_kmeans(leak_names, leak_types,  leak_probabilities):
     # Get elbow for kmeans
     number_leaks, elbowplot = get_elbow_kmeans(leak_names, leak_probabilities)
-    # Save elbow figure
+    # Save elbow figure for sse
     elbowplot.savefig('./figures/kmeans/elbow.png')
+    plt.close()
+    # Save  figure for silhouette
+    get_silhouette_kmeans(leak_names, leak_probabilities).savefig('./figures/kmeans/silhouette_kmeans.png')
+
     plt.close()
 
     for i in range (2, int(number_leaks/2)):
