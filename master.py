@@ -8,6 +8,7 @@ from dataanalisis import one_stat
 from write_latex import get_latex_table
 from clustering import clustering
 from distribution_comparison import get_distribution_comparison
+from servicesanalisis import service_analisis
 from datetime import datetime
 
 verbose = 0
@@ -191,6 +192,25 @@ def get_cluster_with_logging():
     print_and_log("Graphs saved in figures folder", log_file)
     print_and_log(f"Elapsed time for clustering: {elapsed_time:.2f} seconds.\n", log_file)
 
+def get_serviceanalisis_with_logging():
+    log_file = 'log.txt'
+
+    # Start time for the latex file generation
+    start_time = time.time()
+    print_and_log("Starting service data analisis ...", log_file)
+
+    # Call service data analisis
+    service_data ='./services/services.xlsx'
+    service_analisis(service_data)
+
+    # End time for the process
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+
+    print_and_log(f"Service data analisis completed successfully.", log_file)
+    print_and_log("Graphs saved in figures folder", log_file)
+    print_and_log(f"Elapsed time for service data analisis: {elapsed_time:.2f} seconds.\n", log_file)
+
 
 def print_help():
     print("Usage: python master.py [option]")
@@ -199,6 +219,7 @@ def print_help():
     print("-d --distributioncomparison: Get distribution comparison. (file leak_types.txt)")
     print("-l --latex: Make a latex file in the latex folder with important data (file leak_types.txt)")
     print("-c --cluster: Execute the cluster module")
+    print("-sa --serviceanalisis: execute service data analisis from the data colected in the excel document (./services/services.xlsx)")
     print("-h --help: Display this help menu")
     print("No option: Display this help menu")
 
@@ -217,6 +238,8 @@ def main():
             get_latex_with_logging()
         elif option in ['-c', '--cluster']:
             get_cluster_with_logging()
+        elif option in ['-sa', '--serviceanalisis']:
+            get_serviceanalisis_with_logging()
         elif option in ['-h', '--help']:
             print_help()
         else:

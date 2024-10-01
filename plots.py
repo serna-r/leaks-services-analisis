@@ -107,10 +107,44 @@ def plot_by_year(score_distributions, leak_names, colors_leaks, dates_list):
         data_by_year[year]["leak_names"].append(leak_names[i])
         data_by_year[year]["colors"].append(colors_leaks[i])
 
-    # Plot for each year
-    for year, data in data_by_year.items():
-        plot_distributions(data["distributions"], data["leak_names"], data["colors"], year).savefig(f'./figures/years/{year}_year.png')
+    # Separate and sort years, handling "Unknown" separately
+    known_years = sorted([year for year in data_by_year.keys() if year != "Unknown"])
+    if "Unknown" in data_by_year:
+        years = known_years + ["Unknown"]
+    else:
+        years = known_years
+    
+    n_years = len(years)
+    
+    # Create subplots with two columns
+    nrows = (n_years + 1) // 2  # Number of rows based on the number of years
+    fig, axes = plt.subplots(nrows=nrows, ncols=2, figsize=(12, nrows * 5), sharex=True, sharey=True)
 
+    # Flatten axes for easy iteration
+    axes = axes.flatten()
+
+    # Plot bars side by side for each year
+    for idx, year in enumerate(years):
+        ax = axes[idx]
+        data = data_by_year[year]
+        
+        n_distributions = len(data["distributions"])
+        width = 0.8 / n_distributions  # Make sure the bars fit within the x-axis
+        
+        for i, dist in enumerate(data["distributions"]):
+            x = np.arange(len(dist))  # Position on x-axis
+            ax.bar(x + i * width, dist, width=width, color=data["colors"][i], alpha=0.7, label=data["leak_names"][i])
+        
+        ax.set_title(f"Year: {year}")
+        ax.legend()
+    
+    # Hide any unused subplots if the number of years is odd
+    for i in range(len(years), len(axes)):
+        fig.delaxes(axes[i])
+    
+    plt.tight_layout()
+    
+    return plt
 
 
 def plot_scores_by_length(distributions, names, colors=None):
@@ -404,5 +438,44 @@ def plot_5d_scatter(labels, data, categories=None, centroids=None):
     for i, label in enumerate(labels):
         ax.text(x[i], y[i], z[i], label, fontsize=3, color='black')
 
+    return plt
+
+def plot_all_services(distribution_df):
+    # Sort categories (rows) alphabetically
+    sorted_df = distribution_df.sort_index()
+
+    # Number of categories (rows)
+    num_categories = len(sorted_df.index)
+    
+    # Create subplots with two columns
+    nrows = (num_categories + 1) // 2  # Two columns
+    fig, axes = plt.subplots(nrows=nrows, ncols=2, figsize=(12, nrows * 5), sharex=True, sharey=True)
+
+    # Flatten axes for easy iteration
+    axes = axes.flatten()
+
+    # Iterate through each category and plot
+    for i, (category, row) in enumerate(sorted_df.iterrows()):
+        ax = axes[i]
+        distribution = row.values
+        names = row.index
+        
+        # Plot the horizontal bar chart
+        ax.barh(names, distribution, edgecolor='black')
+        
+        # Get mean of non-zero values
+        non0mean = distribution[distribution != 0].mean() if np.any(distribution != 0) else 0
+        
+        # Set title and labels
+        ax.set_title(f"{category} (Non-0 mean: {non0mean:.4f})")
+        ax.set_xlabel("Values")
+        ax.set_ylabel("Categories")
+
+    # Hide any unused subplots if the number of categories is odd
+    for i in range(len(sorted_df), len(axes)):
+        fig.delaxes(axes[i])
+
+    plt.tight_layout()
+    
     return plt
     

@@ -138,7 +138,7 @@ def get_distribution_comparison(leaks_file='leak_types.txt'):
     random_scatterplot_klmatrices(kl_matrices_categories, leak_categories, colors_categories).savefig(figures_folder + 'scatter/categories_scatter_klmatrices.png')
     plt.close()
 
-    plot_by_year(score_distributions, leak_names, colors_leaks, dates_list)
+    plot_by_year(score_distributions, leak_names, colors_leaks, dates_list).savefig(figures_folder + 'years/years_combined.png')
 
 
 if __name__ == '__main__':

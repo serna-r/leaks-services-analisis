@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
+from plots import plot_all_services
 
 def get_data(file):
     # Get the data
@@ -11,21 +11,6 @@ def get_data(file):
         services.iloc[:,i+7] = services.iloc[:,i+7].fillna(0)
 
     return  services
-
-def plot_services_sum(distribution, names, title):
-    # Create a horizontal bar chart using pyplot
-    plt.barh(names, distribution, edgecolor='black')
-    # Get mean of non 0 values
-    non0mean = distribution[distribution!= 0].mean()
-    # Add titles and labels
-    plt.title(f"Categories and Values: {title}, Non 0 mean: {non0mean:.4f}")
-    plt.xlabel("Values")
-    plt.ylabel("Categories")
-
-    # Show the plot
-    plt.tight_layout()
-
-    return plt
 
 def service_analisis(file):
     # Get the data
@@ -40,10 +25,7 @@ def service_analisis(file):
     # Eliminate total column
     sumservices = sumservices.loc[:, sumservices.columns != 'Total']
     # Plot distributions
-    for i in range(len(sumservices.index)):
-        category = sumservices.iloc[i].name
-        plot_services_sum(sumservices.iloc[i, :].values, sumservices.columns, category).savefig(f'./figures/services/{category}.png')
-        plt.close()
+    plot_all_services(sumservices).savefig('./figures/services/services.png')
     # Save csv
     sumservices.to_csv('./services/servicestypesum.csv')
 
