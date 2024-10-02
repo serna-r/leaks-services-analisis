@@ -265,7 +265,7 @@ class ClusterEvaluation:
         silhouette_values = silhouette_samples(self.leak_probabilities, self.numerical_labels)
         return silhouette_index, silhouette_values 
     
-    def plot_silhouette(self):
+    def plot_silhouette(self, vmin=None, vmax=None):
         # Convert numerical_labels to NumPy array for easier handling
         cluster_labels = np.array(self.numerical_labels)
 
@@ -292,6 +292,10 @@ class ClusterEvaluation:
         ax.set_xlabel("Silhouette Score")
         ax.set_ylabel("Services (Leaks)")
         ax.set_title("Silhouette Plot for Each Service by Cluster")
+
+        # Set the x-axis limits based on provided vmin and vmax
+        if vmin is not None and vmax is not None:
+            ax.set_xlim(vmin, vmax)
 
         # Display the plot
         plt.tight_layout()
@@ -330,7 +334,7 @@ def clustering(leaks_file, kmeans=False):
     # Call manual clustering
     manualCluster = ClusterEvaluation(leak_names, numerical_labels, leak_probabilities)
     manualCluster.evaluate()
-    manualCluster.plot_silhouette().savefig("./figures/bars/silohuetteManual.png")
+    manualCluster.plot_silhouette(vmin=-0.7,vmax=0.7).savefig("./figures/bars/silohuetteManual.png")
     # Print measures
     print(f"Manual Measures")
     print(manualCluster, "\n")
@@ -344,7 +348,7 @@ def clustering(leaks_file, kmeans=False):
     sse, cluster_list, centroidsKmeans = execute_kmeans(leak_types, leak_names, leak_probabilities, 5)
     kmeans5Cluster = ClusterEvaluation(leak_names, [item[1] for item in cluster_list], leak_probabilities)
     kmeans5Cluster.evaluate()
-    kmeans5Cluster.plot_silhouette().savefig("./figures/bars/silohuetteKmeans5.png")
+    kmeans5Cluster.plot_silhouette(vmin=-0.7,vmax=0.7).savefig("./figures/bars/silohuetteKmeans5.png")
     print(f"Kmeans 5 Measures")
     print(kmeans5Cluster, "\n")
     # Save indexes in file
