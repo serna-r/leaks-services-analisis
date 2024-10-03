@@ -235,8 +235,7 @@ def plot_matrix(data, labels, cmap, vmin=0, vmax=2):
     ax.set_yticklabels(labels, fontsize=min(12, 300 // len(labels)))
 
     # # Add text for quantile explanation
-    # plt.text(4, 10, f'Q1 (green) {q1:.5f}, Q0.15 (yellow) {q015:.5f}, Q0.10 (red) {q010:.5f}', horizontalalignment='center')
-    ax.set_xlabel(f'Q0.25 (green) {q025:.5f}, Q0.15 (yellow) {q015:.5f}, Q0.10 (red) {q010:.5f}')
+    ax.set_xlabel(f'Q0.25 (green) {q025:.2f}, Q0.15 (yellow) {q015:.2f}, Q0.10 (red) {q010:.2f}')
 
     # Add top margin
     plt.subplots_adjust(top=0.8)
@@ -244,7 +243,7 @@ def plot_matrix(data, labels, cmap, vmin=0, vmax=2):
     # Annotate each cell with the numerical value and add points if lower than quantile
     for i in range(len(labels)):
         for j in range(len(labels)):
-            ax.text(j, i, f'{data[i, j]:.3f}', ha='center', va='center', color='white', fontsize=10)
+            ax.text(j, i, f'{data[i, j]:.2f}', ha='center', va='center', color='white', fontsize=10)
             if i!=j and data[i, j] < q010:
                 ax.text(j, i+0.1, '.', ha='center', va='center', color='red', fontsize=20)
             elif i!=j and data[i, j] < q015:

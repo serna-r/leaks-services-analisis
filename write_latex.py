@@ -30,10 +30,8 @@ def get_latex_table(leaks_file, output_path):
     
     # Dictionary to store the results for each leak
     leak_data = {}
-
-    print(leak_types)
     
-    for leak, category in leak_types:
+    for i, (leak, category) in enumerate(leak_types):
         # Get leak file name
         leak_file = './leaks/' + leak + '/Stats.txt'
         
@@ -52,7 +50,7 @@ def get_latex_table(leaks_file, output_path):
                 mean_score = calculate_mean_score(probability_dist)
                 
                 # Add to the dictionary (number of users, mean length, mean score)
-                leak_data[leak] = (category, date, count, mean_length, mean_score)
+                leak_data[leak] = (category, dates[i], count, mean_length, mean_score)
         
         except FileNotFoundError:
             print(f"File not found: {leak_file}")

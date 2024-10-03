@@ -173,7 +173,7 @@ def get_latex_with_logging():
     print_and_log("File saved in latex folder", log_file)
     print_and_log(f"Elapsed time for latex file generation: {elapsed_time:.2f} seconds.\n", log_file)
 
-def get_cluster_with_logging():
+def get_cluster_with_logging(kmeansTest=False):
     log_file = 'log.txt'
 
     # Start time for the latex file generation
@@ -182,7 +182,7 @@ def get_cluster_with_logging():
 
     # Call cluster function
     leaks_file='leak_types.txt'
-    clustering(leaks_file)
+    clustering(leaks_file, kmeans=kmeansTest)
 
     # End time for the process
     end_time = time.time()
@@ -227,7 +227,7 @@ def main():
     if len(sys.argv) == 1:
         # No arguments provided, show help
         print_help()
-    elif len(sys.argv) == 2:
+    elif len(sys.argv) >= 2:
         option = sys.argv[1]
         
         if option in ['-s', '--stats']:
@@ -237,7 +237,10 @@ def main():
         elif option in ['-l', '--latex']:
             get_latex_with_logging()
         elif option in ['-c', '--cluster']:
-            get_cluster_with_logging()
+            if len(sys.argv) == 3 and sys.argv[2] == 'Kmeans':
+                get_cluster_with_logging(kmeansTest=True)
+            else:
+               get_cluster_with_logging() 
         elif option in ['-sa', '--serviceanalisis']:
             get_serviceanalisis_with_logging()
         elif option in ['-h', '--help']:

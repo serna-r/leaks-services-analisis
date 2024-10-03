@@ -10,6 +10,7 @@ from retrieve_stats import get_count_and_probabilities, get_leak_types
 
 verbose = 0
 OUTPUTFOLDER = './clusters/'
+FINALKMEANS = 6
 
 
 def get_leaks_and_probabilities(leak_types):
@@ -299,6 +300,7 @@ class ClusterEvaluation:
 
         # Display the plot
         plt.tight_layout()
+        plt.grid()
 
         # Return plot
         return plt
@@ -344,15 +346,15 @@ def clustering(leaks_file, kmeans=False):
     plot_5d_scatter(leak_names, leak_probabilities, numerical_labels).savefig("./figures/scatter/services_5d_manualcluster_scatter.png")
     plt.close()
 
-    # Execute kmeans 5
-    sse, cluster_list, centroidsKmeans = execute_kmeans(leak_types, leak_names, leak_probabilities, 5)
+    # Execute kmeans FINALKMEANS
+    sse, cluster_list, centroidsKmeans = execute_kmeans(leak_types, leak_names, leak_probabilities, FINALKMEANS)
     kmeans5Cluster = ClusterEvaluation(leak_names, [item[1] for item in cluster_list], leak_probabilities)
     kmeans5Cluster.evaluate()
-    kmeans5Cluster.plot_silhouette(vmin=-0.7,vmax=0.7).savefig("./figures/bars/silohuetteKmeans5.png")
-    print(f"Kmeans 5 Measures")
+    kmeans5Cluster.plot_silhouette(vmin=-0.7,vmax=0.7).savefig(f"./figures/bars/silohuetteKmeans{FINALKMEANS}.png")
+    print(f"Kmeans {FINALKMEANS} Measures")
     print(kmeans5Cluster, "\n")
     # Save indexes in file
-    with open(OUTPUTFOLDER + 'kmeans5cluster_evaluation.txt', 'w') as f: f.write(str(kmeans5Cluster))
+    with open(OUTPUTFOLDER + f'kmeans{FINALKMEANS}cluster_evaluation.txt', 'w') as f: f.write(str(kmeans5Cluster))
 
 
 if __name__ == '__main__':
