@@ -16,3 +16,20 @@ def extract_hex(text):
     hex_pattern = re.compile(r'\$HEX\[([0-9A-Fa-f]+)\]')
     # Reemplazar todas las coincidencias en el texto
     return hex_pattern.sub(hex_to_ascii, text)
+
+def split_user_email_pass(line):
+    # Eliminate user that is before the first ":"
+    emailpass = line.split(':', 1)[1]
+
+    # Regular expression to capture email and password
+    pattern = r"([^:]+)@([^:]+):(.+)"
+    
+    # Search for matches
+    match = re.match(pattern, emailpass)
+    
+    if match:
+        password = match.group(3)
+        if '$HEX' in password: password = extract_hex(password)
+        return password
+    else:
+        return None

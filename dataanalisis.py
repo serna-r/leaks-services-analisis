@@ -32,7 +32,7 @@ def one_stat(df, metric, output):
 
         # Write output
         with open(output, 'w') as f:
-            f.write(f'{score_count}\n{intervalsguesses_count.to_string()}')
+            f.write(f'Total users read: {len(df.index)}\n\n{score_count}\n{intervalsguesses_count.to_string()}')
 
     if metric == 'password_score_and_length':
         df[['score', 'length']] = pd.DataFrame(df.password_score_and_length.tolist(), index= df.index)

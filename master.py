@@ -17,7 +17,7 @@ leak_stats_file = "leaks.txt"
 # File for leak distributions
 leak_distribution_file='leak_types.txt'
 # Special extraction modes
-modes = ['extract_hex', 'only_password']
+modes = ['extract_hex', 'only_password', 'split_user_email_pass']
 # Single stat
 stats = ['simple_entropy', 'shannon_entropy', 'password_strength', 'password_score_and_length']
 

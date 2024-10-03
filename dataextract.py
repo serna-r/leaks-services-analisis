@@ -22,14 +22,16 @@ def read_files_in_folder(folder, mode=None):
             else:
                 try:
                     for line in f:
+                        # Split email and pass
                         email, password = split_email_and_password(line)
-                        if email is not None and password is not None:
+                        # If there is a mode selected apply it
+                        if mode != None: password = mode_select(password, line, mode)
+                        # Check for missing password
+                        if password is not None:
                             # Check also for unknown or null passwords
-                            if (password == 'NULL' or password == 'none' or password == '?' 
-                                    or password == 'None'):
+                            if password == 'NULL' or password == 'none' or password == '?' or password == 'None' or password == "unknown":
                                 continue
-                            # If there is a mode selected apply it
-                            if mode != None: password = mode_select(password, mode)
+
                             data.append([password])
                             if verbose > 1: print(f"email: {email} password: {password}")
                 except Exception as e:
@@ -92,8 +94,9 @@ def extract():
         
         df.to_csv(folder + '/extracted_data.csv', index=False)
 
-def mode_select(password, mode):
+def mode_select(password, line, mode):
     # Call the mode function
+    if mode == 'split_user_email_pass': return getattr(modes, mode)(line)
     return getattr(modes, mode)(password)
 
 if __name__ == '__main__':
