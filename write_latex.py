@@ -26,12 +26,14 @@ def calculate_mean_score(probability_dist):
 
 def get_latex_table(leaks_file, output_path):
     # Get leaks
-    leak_types = get_leak_types(leaks_file, dates=True)
+    leak_types, dates = get_leak_types(leaks_file, dates=True)
     
     # Dictionary to store the results for each leak
     leak_data = {}
+
+    print(leak_types)
     
-    for leak, category, date in leak_types:
+    for leak, category in leak_types:
         # Get leak file name
         leak_file = './leaks/' + leak + '/Stats.txt'
         

@@ -1,9 +1,9 @@
 bookin          business 01/12/2018
-canva       digitaltool 24/05/2019
+canva           digitaltool 24/05/2019
 chegg           digitaltool 28/04/2018
 dubshmash       social 01/12/2018
 hautelook       shopping 07/08/2018
-linkedin   social 05/05/2012
+linkedin        social 05/05/2012
 mate1           social 29/02/2016
 myheritage      business 26/10/2017
 sharethis       digitaltool 09/07/2018
@@ -17,6 +17,13 @@ zynga           games 01/09/2019
 cashcrate       business 17/11/2016
 clearvoicesurveys business 01/10/2019
 gigasize        business Unknown
-gogames       games Unknown
+gogames         games Unknown
 kickstarter     business 16/02/2014
 lekoolgames     games Unknown
+
+edmodo          digitaltool 01/05/2017
+mixfiend        digitaltool Unknown
+psiho           digitaltool 01/03/2018
+htcmania        news 04/01/2020
+#evony           games 01/06/2016
+#hq              business Unknown

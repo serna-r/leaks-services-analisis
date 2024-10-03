@@ -14,7 +14,8 @@ def get_colors(leak_types):
         'digitaltool': plt.get_cmap('Greens'),
         'shopping': plt.get_cmap('Greys'),
         'social': plt.get_cmap('Reds'),
-        'games': plt.get_cmap('Purples')
+        'games': plt.get_cmap('Purples'),
+        'news': plt.get_cmap('Oranges')
     }
 
     # Dictionary to track the number of times a category appears
@@ -23,7 +24,8 @@ def get_colors(leak_types):
         'digitaltool': 0,
         'shopping': 0,
         'social': 0,
-        'games': 0
+        'games': 0,
+        'news' : 0
     }
     
     # Colors for leaks

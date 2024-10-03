@@ -105,14 +105,19 @@ def statistics(df, output):
     score_count = df.groupby('score', observed=True)['Password'].count()
     if verbose > 0: print('Score count: ', score_count)
 
-    # Group guesses for graphs
-    # Create logarithmic bins
-    bins = np.logspace(np.log10(df['guesses'].min()), np.log10(df['guesses'].max()), 21)
-    # Apply pd.cut with these bins
-    intervalsguesses = pd.cut(df['guesses'], bins=bins)
-    # Count how many passwords are in each interval
-    intervalsguesses_count = df.groupby(intervalsguesses, observed=True)['Password'].count()
-
+    # This causes bugs because of pandas checking for bins increasing monotonically
+    try:
+        # Group guesses for graphs
+        # Create logarithmic bins
+        bins = np.logspace(np.log10(df['guesses'].min()), np.log10(df['guesses'].max()), 21)
+        # Apply pd.cut with these bins
+        intervalsguesses = pd.cut(df['guesses'], bins=bins)
+        # Count how many passwords are in each interval
+        intervalsguesses_count = df.groupby(intervalsguesses, observed=True)['Password'].count()
+    except Exception as e:
+        # Create 
+        intervalsguesses_count = pd.DataFrame()
+        print(f"Exception:\n{e}\nBins\n{bins}")
 
     if verbose >= 0: print('\nData processed columns created: ', df.columns.values)
 
