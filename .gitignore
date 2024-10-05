@@ -26,6 +26,8 @@ __pycache__/
 !leak_types.txt
 # Excluir los txt de cluster evaluation
 !*cluster_evaluation.txt
+# Excluir password strength
+!password_strength.txt
 
 # Ignorar todos los archivos de Excel
 *.xlsx

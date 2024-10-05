@@ -17,22 +17,24 @@ def one_stat(df, metric, output):
             f.write(f'{interval_count.to_string()}')
 
     if metric == 'password_strength':
+        # Common passwords
+        common_passwords = df['Password'].value_counts()
         # Break column into score and guesses
         df[['score', 'guesses']] = pd.DataFrame(df['password_strength'].tolist(), index=df.index)
 
         # Process scores and count
         score_count = df.groupby('score', observed=True)['Password'].count()
 
-        # Create logarithmic bins
-        bins = np.logspace(np.log10(df['guesses'].min()), np.log10(df['guesses'].max()), 21)
-        # Apply pd.cut with these bins
-        intervalsguesses = pd.cut(df['guesses'], bins=bins)
-        # Count how many passwords are in each interval
-        intervalsguesses_count = df.groupby(intervalsguesses, observed=True)['Password'].count()
+        # # Create logarithmic bins
+        # bins = np.logspace(np.log10(df['guesses'].min()), np.log10(df['guesses'].max()), 21)
+        # # Apply pd.cut with these bins
+        # intervalsguesses = pd.cut(df['guesses'], bins=bins)
+        # # Count how many passwords are in each interval
+        # intervalsguesses_count = df.groupby(intervalsguesses, observed=True)['Password'].count()
 
         # Write output
         with open(output, 'w') as f:
-            f.write(f'Total users read: {len(df.index)}\n\n{score_count}\n{intervalsguesses_count.to_string()}')
+            f.write(f'Total users read: {len(df.index)}\n\n"20 Most Common Passwords:\n{common_passwords[:20]}\n\nScore Distribution:\n{score_count.to_string()}')
 
     if metric == 'password_score_and_length':
         df[['score', 'length']] = pd.DataFrame(df.password_score_and_length.tolist(), index= df.index)
