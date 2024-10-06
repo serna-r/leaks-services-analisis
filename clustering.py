@@ -353,6 +353,9 @@ def clustering(leaks_file, kmeans=False):
     kmeansCluster.plot_silhouette(vmin=-0.7,vmax=0.7).savefig(f"./figures/bars/silohuetteKmeans{FINALKMEANS}.png")
     print(f"Kmeans {FINALKMEANS} Measures")
     print(kmeansCluster, "\n")
+    # Plot kmeans scatter
+    plot_5d_scatter(leak_names, leak_probabilities, kmeansCluster.numerical_labels, centroidsKmeans).savefig("./figures/scatter/services_5d_kmeanscluster_scatter.png")
+
     # Save indexes in file
     with open(OUTPUTFOLDER + f'kmeans{FINALKMEANS}cluster_evaluation.txt', 'w') as f: f.write(str(kmeansCluster))
 
