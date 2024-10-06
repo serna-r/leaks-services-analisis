@@ -44,7 +44,7 @@ def get_latex_table(leaks_file, output_path):
                 # Get number of users, mean password length, and score probabilities
                 count = get_count(data)
                 mean_length = get_password_length_mean(data)
-                count_list, probability_dist = get_count_and_probabilities(data)
+                count_list, probability_dist = get_count_and_probabilities(leak)
                 
                 # Calculate the mean score using the score probabilities
                 mean_score = calculate_mean_score(probability_dist)

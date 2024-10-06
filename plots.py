@@ -389,6 +389,9 @@ def boxwhiskers_from_kl_matrices(kl_matrices, labels, colors=None):
         non_diag_values = matrix.to_numpy()[~np.eye(matrix.shape[0], dtype=bool)]
         values.append(non_diag_values)
 
+    # Create space in digital tool
+    labels = [label.replace('digitaltool', 'digital tool') for label in labels]
+
     # Create boxplot
     plt.figure(figsize=(8, 6))
     plt.boxplot(values, showmeans='True')
