@@ -348,13 +348,13 @@ def clustering(leaks_file, kmeans=False):
 
     # Execute kmeans FINALKMEANS
     sse, cluster_list, centroidsKmeans = execute_kmeans(leak_types, leak_names, leak_probabilities, FINALKMEANS)
-    kmeans5Cluster = ClusterEvaluation(leak_names, [item[1] for item in cluster_list], leak_probabilities)
-    kmeans5Cluster.evaluate()
-    kmeans5Cluster.plot_silhouette(vmin=-0.7,vmax=0.7).savefig(f"./figures/bars/silohuetteKmeans{FINALKMEANS}.png")
+    kmeansCluster = ClusterEvaluation(leak_names, [item[1] for item in cluster_list], leak_probabilities)
+    kmeansCluster.evaluate()
+    kmeansCluster.plot_silhouette(vmin=-0.7,vmax=0.7).savefig(f"./figures/bars/silohuetteKmeans{FINALKMEANS}.png")
     print(f"Kmeans {FINALKMEANS} Measures")
-    print(kmeans5Cluster, "\n")
+    print(kmeansCluster, "\n")
     # Save indexes in file
-    with open(OUTPUTFOLDER + f'kmeans{FINALKMEANS}cluster_evaluation.txt', 'w') as f: f.write(str(kmeans5Cluster))
+    with open(OUTPUTFOLDER + f'kmeans{FINALKMEANS}cluster_evaluation.txt', 'w') as f: f.write(str(kmeansCluster))
 
 
 if __name__ == '__main__':
