@@ -65,36 +65,44 @@ def get_colors(leak_types):
 def plot_distributions(distributions, names, colors=None, year=None):
     num_distributions = len(distributions)
     num_categories = len(distributions[0])  # Each distribution has 5 score categories
-    
+
     # Positions for the bars
     x = np.arange(num_categories)  # Category positions on the x-axis
     bar_width = 0.8 / num_distributions  # Width of each bar
 
-    plt.figure(figsize=(12, 6))
-    
+    plt.figure(figsize=(12, 7))  # Increase figure height
+
     for i, distribution in enumerate(distributions):
         plt.bar(
             x + i * bar_width,  # Shift each service's bars to the right
-            distribution, 
-            bar_width, 
+            distribution,
+            bar_width,
             label=names[i],  # Use the service's name as the label
             color=colors[i] if colors else None  # Use provided colors, if any
         )
-    
+
     plt.xlabel('Scores (zxcvbn)')
     plt.ylabel('Probability')
 
-    if year != None : plt.title(f'Probability Distributions for {year}')
-    else: plt.title(f'Probability Distributions')
-    
+    if year is not None:
+        plt.title(f'Probability Distributions for {year}')
+    else:
+        plt.title(f'Probability Distributions')
+
     # Set x-ticks to be centered with proper labels (Score 0, Score 1, ...)
     plt.xticks(x + bar_width * (num_distributions - 1) / 2, [f'Score {i}' for i in range(num_categories)])
-    
-    plt.legend(loc='best')
+
+    # Move the legend above the title and split it into multiple rows if it's too long
+    ncols = min(4, num_distributions)  # Set max columns to 4
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.55), ncol=ncols)  # Move legend higher above title
+
+    # Adjust the layout to add more space above the plot for the legend and title
+    plt.subplots_adjust(top=0.85)
+
     plt.tight_layout()
     return plt
 
-def plot_by_year(score_distributions, leak_names, colors_leaks, dates_list):
+def plot_by_year_average(score_distributions, leak_names, colors_leaks, dates_list):
     # Organize data by year
     data_by_year = {}
     for i, date in enumerate(dates_list):
@@ -109,44 +117,122 @@ def plot_by_year(score_distributions, leak_names, colors_leaks, dates_list):
         data_by_year[year]["leak_names"].append(leak_names[i])
         data_by_year[year]["colors"].append(colors_leaks[i])
 
-    # Separate and sort years, handling "Unknown" separately
+    # Sort years, with "Unknown" last
     known_years = sorted([year for year in data_by_year.keys() if year != "Unknown"])
     if "Unknown" in data_by_year:
         years = known_years + ["Unknown"]
     else:
         years = known_years
-    
-    n_years = len(years)
-    
-    # Create subplots with two columns
-    nrows = (n_years + 1) // 2  # Number of rows based on the number of years
-    fig, axes = plt.subplots(nrows=nrows, ncols=2, figsize=(12, nrows * 5), sharex=True, sharey=True)
 
-    # Flatten axes for easy iteration
-    axes = axes.flatten()
+    num_categories = len(score_distributions[0])  # Assuming all distributions have the same number of categories
 
-    # Plot bars side by side for each year
-    for idx, year in enumerate(years):
-        ax = axes[idx]
+    # Plotting
+    plt.figure(figsize=(12, 7))
+
+    # Positions for the bars
+    x = np.arange(num_categories)  # Category positions on the x-axis
+    bar_width = 0.8 / len(years)  # Width of each bar per year
+
+    # Plot bars ordered by year
+    for i, year in enumerate(years):
         data = data_by_year[year]
-        
-        n_distributions = len(data["distributions"])
-        width = 0.8 / n_distributions  # Make sure the bars fit within the x-axis
-        
-        for i, dist in enumerate(data["distributions"]):
-            x = np.arange(len(dist))  # Position on x-axis
-            ax.bar(x + i * width, dist, width=width, color=data["colors"][i], alpha=0.7, label=data["leak_names"][i])
-        
-        ax.set_title(f"Year: {year}")
-        ax.legend()
-    
-    # Hide any unused subplots if the number of years is odd
-    for i in range(len(years), len(axes)):
-        fig.delaxes(axes[i])
-    
+        combined_distribution = np.mean(data["distributions"], axis=0)  # Average distribution for the year
+        plt.bar(
+            x + i * bar_width, 
+            combined_distribution, 
+            bar_width, 
+            label=str(year), 
+            color=data["colors"][0]  # Use the first color for the year (assuming consistency in color for each year)
+        )
+
+    plt.xlabel('Scores (zxcvbn)')
+    plt.ylabel('Probability')
+
+    plt.title('Probability Distributions average by Year')
+
+    # Set x-ticks to be centered with proper labels (Score 0, Score 1, ...)
+    plt.xticks(x + bar_width * (len(years) - 1) / 2, [f'Score {i}' for i in range(num_categories)])
+
+    # Move the legend to the top, with years in rows if there are too many
+    ncols = min(4, len(years))  # Set max columns to 4
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.25), ncol=ncols)
+
+    # Adjust layout to make space for legend
+    plt.subplots_adjust(top=0.85)
     plt.tight_layout()
-    
+
     return plt
+
+
+def plot_by_year(score_distributions, leak_names, colors_leaks, dates_list):
+    # Organize data by year
+    data_by_year = {}
+    for i, date in enumerate(dates_list):
+        try:
+            year = datetime.strptime(date, "%d/%m/%Y").year
+        except ValueError:
+            year = "Unknown"
+        
+        if year not in data_by_year:
+            data_by_year[year] = {"distributions": [], "leak_names": []}
+        data_by_year[year]["distributions"].append(score_distributions[i])
+        data_by_year[year]["leak_names"].append(leak_names[i])
+
+    # Sort years, with "Unknown" last
+    known_years = sorted([year for year in data_by_year.keys() if year != "Unknown"])
+    if "Unknown" in data_by_year:
+        years = known_years + ["Unknown"]
+    else:
+        years = known_years
+
+    num_categories = len(score_distributions[0])  # Assuming all distributions have the same number of categories
+
+    # Generate distinct colors
+    colors = plt.cm.viridis(np.linspace(0, 1, len(years)))  # Using the 'viridis' colormap for better visibility
+
+    # Plotting
+    plt.figure(figsize=(12, 7))
+
+    # Positions for the bars
+    x = np.arange(num_categories)  # Category positions on the x-axis
+    bar_width = 0.8 / sum(len(data_by_year[year]["distributions"]) for year in years)  # Bar width
+
+    total_distributions = 0  # Counter to correctly position bars
+
+    # Plot bars for each year and its corresponding distributions
+    for idx, year in enumerate(years):
+        data = data_by_year[year]
+        n_distributions = len(data["distributions"])
+
+        for i in range(n_distributions):
+            distribution = data["distributions"][i]
+            plt.bar(
+                x + total_distributions * bar_width, 
+                distribution, 
+                bar_width, 
+                label=data["leak_names"][i] if i == 0 else "",  # Label each leak in the legend, only once per year
+                color=colors[idx],  # Use the generated color
+                alpha=0.9
+            )
+            total_distributions += 1
+
+    plt.xlabel('Scores (zxcvbn)')
+    plt.ylabel('Probability')
+
+    plt.title('Probability Distributions Ordered and Colored by Year')
+
+    # Set x-ticks to be centered with proper labels (Score 0, Score 1, ...)
+    plt.xticks(x + bar_width * (total_distributions - 1) / 2, [f'Score {i}' for i in range(num_categories)])
+
+    # Create a custom legend for the years using the colors from the generated list
+    plt.legend([f'Year {year}' for year in years], loc='upper center', bbox_to_anchor=(0.5, 1.25), ncol=min(4, len(years)))
+
+    # Adjust layout to make space for the legend
+    plt.subplots_adjust(top=0.85)
+    plt.tight_layout()
+
+    return plt
+
 
 
 def plot_scores_by_length(distributions, names, colors=None):

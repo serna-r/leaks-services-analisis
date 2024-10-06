@@ -4,7 +4,7 @@ from scipy.stats import entropy
 import pandas as pd
 import warnings
 from retrieve_stats import get_count_and_probabilities, get_mask_distribution, get_score_and_length, get_leak_types
-from plots import get_colors, plot_distributions, plot_matrix, plot_scores_by_length, boxwhiskers_from_kl_matrix, plot_by_length, boxwhiskers_from_kl_matrices, random_scatterplot_klmatrices, plot_by_year
+from plots import get_colors, plot_distributions, plot_matrix, plot_scores_by_length, boxwhiskers_from_kl_matrix, plot_by_length, boxwhiskers_from_kl_matrices, random_scatterplot_klmatrices, plot_by_year, plot_by_year_average
 
 # Suppress the FutureWarning and the runtime one
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -13,7 +13,7 @@ warnings.simplefilter(action='ignore', category=RuntimeWarning)
 figures_folder = 'figures/'
 length = False
 
-def compute_kl_matrix(distributions, names):
+def compute_kl_matrix(distributions, names):  
     num_distributions = len(distributions)
     kl_matrix = np.zeros((num_distributions, num_distributions))
 
@@ -76,7 +76,7 @@ def get_distribution_comparison(leaks_file='leak_types.txt'):
             # Read file
             data = f.read()
             # Get count and probabilities for score
-            count, probability = get_count_and_probabilities(data)
+            count, probability = get_count_and_probabilities(leak)
             # Get mask distributions
             mask_df = get_mask_distribution(data)
 
@@ -139,6 +139,9 @@ def get_distribution_comparison(leaks_file='leak_types.txt'):
     plt.close()
 
     plot_by_year(score_distributions, leak_names, colors_leaks, dates_list).savefig(figures_folder + 'years/years_combined.png')
+    plt.close()
+
+    plot_by_year_average(score_distributions, leak_names, colors_leaks, dates_list).savefig(figures_folder + 'years/years_combined_averaged.png')
 
 
 if __name__ == '__main__':

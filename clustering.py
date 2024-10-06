@@ -27,7 +27,7 @@ def get_leaks_and_probabilities(leak_types):
             data = f.read()
             
             # Get score probabilities
-            count_list, probability_dist = get_count_and_probabilities(data)
+            count_list, probability_dist = get_count_and_probabilities(leak)
             # Append to list
             leak_probabilities.append(probability_dist)
             leak_names.append(leak)

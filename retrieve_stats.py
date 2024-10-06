@@ -86,29 +86,35 @@ def get_count(data):
 
     return total_users
 
-def get_count_and_probabilities(data):
+def get_count_and_probabilities(leak):
 
-    total_users = get_count(data)
+    leak_file = './leaks/' + leak + '/password_strength.txt'
 
-    # Extract score distribution
-    score_distribution = defaultdict(int)
-    score_section_match = re.search(r"Score Distribution:\nscore\n((?:\d+\s+\d+\n)+)", data)
+    with open(leak_file, 'r') as f:
 
-    if score_section_match:
-        score_lines = score_section_match.group(1).strip().split('\n')
-        for line in score_lines:
-            score, count = map(int, line.split())
-            score_distribution[score] = count
+        data = f.read()
 
-    # Convert scores into probabilities
-    probability_dist = []
-    count_list = []
-    for score, count in score_distribution.items():
-        count_list.append(count)
-        probability_dist.append(count/total_users)
+        total_users = get_count(data)
 
-    # Return probability list
-    return count_list, probability_dist
+        # Extract score distribution
+        score_distribution = defaultdict(int)
+        score_section_match = re.search(r"Score Distribution:\nscore\n((?:\d+\s+\d+\n?)+)", data)
+
+        if score_section_match:
+            score_lines = score_section_match.group(1).strip().split('\n')
+            for line in score_lines:
+                score, count = map(int, line.split())
+                score_distribution[score] = count
+
+        # Convert scores into probabilities
+        probability_dist = []
+        count_list = []
+        for score, count in score_distribution.items():
+            count_list.append(count)
+            probability_dist.append(count/total_users)
+
+        # Return probability list
+        return count_list, probability_dist
 
 def get_score_and_length(file_path):
     # Read the file into a DataFrame

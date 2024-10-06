@@ -237,7 +237,7 @@ def main():
         elif option in ['-l', '--latex']:
             get_latex_with_logging()
         elif option in ['-c', '--cluster']:
-            if len(sys.argv) == 3 and sys.argv[2] == 'Kmeans':
+            if len(sys.argv) == 3 and sys.argv[2].lower() == 'kmeans':
                 get_cluster_with_logging(kmeansTest=True)
             else:
                get_cluster_with_logging() 

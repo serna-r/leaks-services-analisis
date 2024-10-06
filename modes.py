@@ -11,11 +11,14 @@ def hex_to_ascii(match):
     ascii_str = ascii_str.replace("\x00", "")
     return ascii_str
 
-def extract_hex(text):
+def extract_hex(password):
+    # Check for empty password
+    if password == None:
+        return None
     # Expresión regular para detectar el formato $HEX[3132333435360000]
     hex_pattern = re.compile(r'\$HEX\[([0-9A-Fa-f]+)\]')
     # Reemplazar todas las coincidencias en el texto
-    return hex_pattern.sub(hex_to_ascii, text)
+    return hex_pattern.sub(hex_to_ascii, password)
 
 def split_user_email_pass(line):
     # Eliminate user that is before the first ":"

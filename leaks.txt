@@ -1,34 +1,34 @@
-bookin password_strength
-canva password_strength
-chegg password_strength
-dubshmash password_strength
-hautelook password_strength
-linkedin password_strength
-mate1 password_strength
-myheritage password_strength
-sharethis extract_hex password_strength
-shein password_strength
-dropbox password_strength only_password
-dubsmash2 password_strength only_password
-myspace password_strength only_password
-youku password_strength only_password
-zynga password_strength only_password
-cashcrate password_strength
-clearvoicesurveys password_strength
-gigasize password_strength
-gogogames password_strength
-kickstarter password_strength
-lekoolgames password_strength
+#bookin password_strength
+#canva password_strength
+#chegg password_strength
+#dubshmash password_strength
+#hautelook password_strength
+#linkedin password_strength
+#mate1 password_strength
+#myheritage password_strength
+sharethis password_strength extract_hex
+#shein password_strength
+#dropbox password_strength only_password
+#dubsmash2 password_strength only_password
+#myspace password_strength only_password
+#youku password_strength only_password
+#zynga password_strength only_password
+#cashcrate password_strength
+#clearvoicesurveys password_strength
+#gigasize password_strength
+#gogames password_strength
+#kickstarter password_strength
+#lekoolgames password_strength
 
-edmodo password_strength
-mixfiend password_strength
-psiho password_strength
-htcmania password_strength
+#edmodo password_strength
+#mixfiend password_strength
+#psiho password_strength
+#htcmania password_strength
 
-evony password_strength
-hq password_strength
+#evony password_strength
+#hq password_strength
 
-loginlive password_strength
-cafepress password_strength
+#loginlive password_strength
+#cafepress password_strength
 
-datpiff password_strength split_user_email_pass
+#datpiff password_strength split_user_email_pass
