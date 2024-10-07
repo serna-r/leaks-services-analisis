@@ -7,14 +7,24 @@ def write_latex_table(data, output_path):
         file.write("\\begin{tabular}{|l|l|c|c|c|c|}\n")  # Added a new 'l' for the Category column
         file.write("\\hline\n")
         file.write("\\textbf{Source} & \\textbf{Category} & \\textbf{Date} & \\textbf{Number of Users} & \\textbf{Mean Length} & \\textbf{Mean Score} \\\\\n")
-        file.write("\\hline\n")
+
+        # Get first category
+        last_category = ''
         # Loop through the data dictionary and fill the table with appropriate values
         for source, stats in data.items():
             category, date, num_users, mean_length, mean_score  = stats  # Unpack the category
+            # If the category is different print line
+            category = category.capitalize()
+            if category != last_category:
+                file.write("\\hline\n")
+                last_category = category
+            if category == 'Digitaltool':
+                category = 'Digital tool'
             # The Date column is left empty as per your table structure
             file.write(f"{source} & {category} & {date}  & {num_users} & {mean_length:.2f} & {mean_score:.2f} \\\\\n")
         file.write("\\hline\n")
         file.write("\\end{tabular}\n")
+        file.write("\\label{table:dataleaks}")
         file.write("\\caption{Summary of data breaches with user information.}\n")
         file.write("\\end{table*}\n")
 
@@ -55,9 +65,11 @@ def get_latex_table(leaks_file, output_path):
         except FileNotFoundError:
             print(f"File not found: {leak_file}")
             continue
-
+    
+    # Order by category
+    leak_data_ordered = dict(sorted(leak_data.items(), key=lambda d: d[1]))
     # Write the LaTeX table to the output path
-    write_latex_table(leak_data, output_path)
+    write_latex_table(leak_data_ordered, output_path)
 
 if __name__ == '__main__':
     # Define the output path for the LaTeX table
