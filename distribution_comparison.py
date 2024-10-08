@@ -112,7 +112,7 @@ def get_distribution_comparison(leaks_file='leak_types.txt'):
 
 
     # Plot and save the score distributions
-    plot_distributions(score_distributions, leak_names, colors_leaks).savefig(figures_folder + 'bars/scores_distribution.png')
+    plot_distributions(score_distributions, leak_names, colors_leaks, colors_categories=colors_categories, categories=leak_categories).savefig(figures_folder + 'bars/scores_distribution.png')
     # Plot and save the kl score matrix
     plot_matrix(kl_df_score.values, leak_names, 'coolwarm', vmin=0, vmax=1).savefig(figures_folder + 'klmatrices/scores_kl_matrix.png')
     # Get box and whiskers plot for values in the score kl matrix

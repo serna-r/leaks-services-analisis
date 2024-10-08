@@ -1,7 +1,7 @@
 Cluster Evaluation Indices:
-SSW: 0.8415557917857214, SSB: 0.12871303474001183
-Ball-Hall Index: 0.1403
-Calinski-Harabasz Index: 0.6118
-Hartigan Index: -1.8777
-Davies-Bouldin Index: 3.0999
-Silhouette Index: -0.3282
+SSW: 0.8393215894454362, SSB: 0.1210575481632273
+Ball-Hall Index: 0.1399
+Calinski-Harabasz Index: 0.5481
+Hartigan Index: -1.9363
+Davies-Bouldin Index: 3.1388
+Silhouette Index: -0.3329

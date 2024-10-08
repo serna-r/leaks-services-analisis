@@ -10,7 +10,7 @@ from retrieve_stats import get_count_and_probabilities, get_leak_types
 
 verbose = 0
 OUTPUTFOLDER = './clusters/'
-FINALKMEANS = 6
+FINALKMEANS = 4
 
 
 def get_leaks_and_probabilities(leak_types):

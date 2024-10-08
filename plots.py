@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.colors import to_rgba
+import matplotlib.patches as mpatches
 from datetime import datetime
 
 # Get diferent colors for each type of service
@@ -15,7 +16,7 @@ def get_colors(leak_types):
         'shopping': plt.get_cmap('Greys'),
         'social': plt.get_cmap('Reds'),
         'games': plt.get_cmap('Purples'),
-        'news': plt.get_cmap('Oranges')
+        'news': plt.get_cmap('Wistia')
     }
 
     # Dictionary to track the number of times a category appears
@@ -49,20 +50,19 @@ def get_colors(leak_types):
     colors_categories = []
 
     # Get a color for each category
-    for category in category_count:
+    for category in dict(sorted(category_count.items(), key=lambda d: d[0])):
         # Get colormap
         colormap = base_colors[category]
         # Select color in the middle
-        color = colormap(0.99)
+        color = colormap(0.70)
         
         # Append the color
         colors_categories.append(color)
-    
-    
+
     return colors_leaks, colors_categories
             
 
-def plot_distributions(distributions, names, colors=None, year=None):
+def plot_distributions(distributions, names, colors=None, colors_categories = None, categories = None, year=None):
     num_distributions = len(distributions)
     num_categories = len(distributions[0])  # Each distribution has 5 score categories
 
@@ -70,14 +70,14 @@ def plot_distributions(distributions, names, colors=None, year=None):
     x = np.arange(num_categories)  # Category positions on the x-axis
     bar_width = 0.8 / num_distributions  # Width of each bar
 
-    plt.figure(figsize=(12, 7))  # Increase figure height
+    fig, ax = plt.subplots(figsize=(12, 7))
 
     for i, distribution in enumerate(distributions):
         plt.bar(
             x + i * bar_width,  # Shift each service's bars to the right
             distribution,
             bar_width,
-            label=names[i],  # Use the service's name as the label
+            label=names[i].capitalize(),  # Use the service's name as the label
             color=colors[i] if colors else None  # Use provided colors, if any
         )
 
@@ -92,9 +92,19 @@ def plot_distributions(distributions, names, colors=None, year=None):
     # Set x-ticks to be centered with proper labels (Score 0, Score 1, ...)
     plt.xticks(x + bar_width * (num_distributions - 1) / 2, [f'Score {i}' for i in range(num_categories)])
 
+    # Legend for categories (Second Legend)
+    if categories is not None and colors_categories is not None:
+        # Format strings
+        categories = [cat.capitalize() for cat in categories]
+        categories = [cat.replace('Digitaltool', 'Digital Tool') for cat in categories]
+        # Create legend handles with color patches
+        category_handles = [mpatches.Patch(color=color, label=category) for color, category in zip(colors_categories, categories)]
+        categories_legend = ax.legend(handles=category_handles, title="Categories", loc='upper right')
+        ax.add_artist(categories_legend)
     # Move the legend above the title and split it into multiple rows if it's too long
     ncols = min(4, num_distributions)  # Set max columns to 4
-    plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.55), ncol=ncols)  # Move legend higher above title
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.55), ncol=ncols)
+
 
     # Adjust the layout to add more space above the plot for the legend and title
     plt.subplots_adjust(top=0.85)
