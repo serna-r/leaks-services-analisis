@@ -24,6 +24,6 @@ lekoolgames     games Unknown
 edmodo          social 01/05/2017
 mixfiend        digitaltool Unknown
 psiho           digitaltool 01/03/2018
-htcmania        news 04/01/2020
+htcmania        social 04/01/2020
 evony           games 01/06/2016
 hq              business Unknown
