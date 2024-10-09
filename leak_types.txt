@@ -21,7 +21,7 @@ gogames         games Unknown
 kickstarter     business 16/02/2014
 lekoolgames     games Unknown
 
-edmodo          digitaltool 01/05/2017
+edmodo          social 01/05/2017
 mixfiend        digitaltool Unknown
 psiho           digitaltool 01/03/2018
 htcmania        news 04/01/2020

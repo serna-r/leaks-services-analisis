@@ -29,7 +29,7 @@ def read_files_in_folder(folder, mode=None):
                         # Check for missing password
                         if password is not None:
                             # Check also for unknown or null passwords
-                            if password == 'NULL' or password == 'none' or password == '?' or password == 'None' or password == "unknown":
+                            if password == 'NULL' or password == 'none' or password == '?' or password == 'None' or password == "unknown" or password == '(null)':
                                 continue
 
                             data.append([password])

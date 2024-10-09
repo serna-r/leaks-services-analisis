@@ -6,7 +6,7 @@
 #linkedin password_strength
 #mate1 password_strength
 #myheritage password_strength
-sharethis password_strength extract_hex
+#sharethis password_strength extract_hex
 #shein password_strength
 #dropbox password_strength only_password
 #dubsmash2 password_strength only_password
@@ -20,7 +20,7 @@ sharethis password_strength extract_hex
 #kickstarter password_strength
 #lekoolgames password_strength
 
-#edmodo password_strength
+edmodo password_strength
 #mixfiend password_strength
 #psiho password_strength
 #htcmania password_strength

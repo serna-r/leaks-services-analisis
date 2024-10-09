@@ -10,7 +10,7 @@ from retrieve_stats import get_count_and_probabilities, get_leak_types
 
 verbose = 0
 OUTPUTFOLDER = './clusters/'
-FINALKMEANS = 4
+FINALKMEANS = 6
 
 
 def get_leaks_and_probabilities(leak_types):
@@ -351,6 +351,8 @@ def clustering(leaks_file, kmeans=False):
     kmeansCluster = ClusterEvaluation(leak_names, [item[1] for item in cluster_list], leak_probabilities)
     kmeansCluster.evaluate()
     kmeansCluster.plot_silhouette(vmin=-0.7,vmax=0.7).savefig(f"./figures/bars/silohuetteKmeans{FINALKMEANS}.png")
+    print
+    #plot_kmeans(list(zip(leak_types, kmeans.labels_.tolist(), leak_probabilities)), kmeansCluster.ssw)
     print(f"Kmeans {FINALKMEANS} Measures")
     print(kmeansCluster, "\n")
     # Plot kmeans scatter
