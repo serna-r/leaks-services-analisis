@@ -351,8 +351,10 @@ def clustering(leaks_file, kmeans=False):
     kmeansCluster = ClusterEvaluation(leak_names, [item[1] for item in cluster_list], leak_probabilities)
     kmeansCluster.evaluate()
     kmeansCluster.plot_silhouette(vmin=-0.7,vmax=0.7).savefig(f"./figures/bars/silohuetteKmeans{FINALKMEANS}.png")
-    print
-    #plot_kmeans(list(zip(leak_types, kmeans.labels_.tolist(), leak_probabilities)), kmeansCluster.ssw)
+    # Plot bars cluster sorted
+    sorted_kmeans = sorted(list(zip(leak_types, kmeansCluster.numerical_labels, leak_probabilities)), key=lambda x: x[1])
+    plot_kmeans(sorted_kmeans, kmeansCluster.ssw, default_sort=False).savefig(f"./figures/kmeans/kmeans_k{FINALKMEANS}_sorted.png")
+    # Print stats for kmeans
     print(f"Kmeans {FINALKMEANS} Measures")
     print(kmeansCluster, "\n")
     # Plot kmeans scatter

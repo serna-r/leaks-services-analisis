@@ -440,9 +440,10 @@ def random_scatterplot_klmatrices(kl_matrices, labels, colors = None):
     
     return plt
 
-def plot_kmeans(data, sse):
+def plot_kmeans(data, sse, default_sort = True):
     # Sort data by category
-    data_sorted = sorted(data, key=lambda x: x[0][0])
+    if default_sort: data_sorted = sorted(data, key=lambda x: x[0][0])
+    else: data_sorted = data
 
     # Extract sorted labels, categories, and values
     labels = [f"{entry[0][0]} ({entry[0][1]})" for entry in data_sorted]  # Individual (Category)
