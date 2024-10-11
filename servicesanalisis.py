@@ -15,17 +15,21 @@ def get_data(file):
 def service_analisis(file):
     # Get the data
     services = get_data(file)
-    # Group by service
-    sumservices = services.iloc[:, 7:21]
+    # Choose relevant columns
+    sumservices = services.iloc[:, 7:27]
     sumservices['Type'] = services['Type']
+    # Add total column to store total of services in column
     sumservices['Total'] = 1.0
+    # Group by service
     sumservices = sumservices.groupby(['Type']).sum()
-    # Normalize and get important columns
-    sumservices.iloc[:, 0:] = sumservices.iloc[:, 0:].div(sumservices['Total'], axis=0)
+    # Normalize
+    sumservices = sumservices.div(sumservices['Total'], axis=0)
     # Eliminate total column
     sumservices = sumservices.loc[:, sumservices.columns != 'Total']
-    # Plot distributions
+    # Plot distributions with all data
     plot_all_services(sumservices).savefig('./figures/services/services.png')
+    # Plot distributions with only personal data
+    plot_all_services(sumservices.iloc[:, 2:]).savefig('./figures/services/services_personal.png')
     # Save csv
     sumservices.to_csv('./services/servicestypesum.csv')
 
