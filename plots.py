@@ -577,4 +577,50 @@ def plot_all_services(distribution_df):
     plt.tight_layout()
     
     return plt
+
+def plot_categories_risks(categories_risks):
+    plt.figure(figsize=(10,6))
+    cmap = plt.get_cmap('tab20')
+
+    plt.bar(categories_risks.iloc[:, 0], categories_risks['Risk'], color=cmap.colors)
+
+    # Adding labels and title
+    plt.xlabel('Category')
+    plt.ylabel('Value')
+    plt.title('Category Value Distribution')
+    plt.xticks(rotation=45, ha='right')
+
+    # Display the plot
+    plt.tight_layout()
+    
+    return plt
+
+def plot_box_whiskers_servicesrisk(services_risk):
+    # Get colors
+    cmap = plt.get_cmap('tab20')
+    colors = cmap.colors
+    
+    # Get unique service types
+    labels = services_risk['Type'].unique()
+    # Clean nan
+    labels = [x for x in labels if str(x) != 'nan']
+    
+    # Collect values grouped by service type
+    values = [services_risk[services_risk['Type'] == service]['Risk'].values for service in labels]
+
+    # Create a boxplot
+    plt.figure(figsize=(10, 8))
+    plt.boxplot(values, showmeans=True)
+    plt.title('Box-and-Whiskers Plot of Risk by Service Type')
+    plt.ylabel('Risk')
+    plt.xticks(np.array([i for i in range(len(labels))]) + 1, labels, rotation=45, ha='right', fontsize=8)
+    plt.grid(True)
+
+    # Add scatter plot of individual points, color-coded
+    for i in range(len(labels)):
+        y = values[i]
+        x = np.random.normal(1 + i, 0.04, size=len(y))
+        plt.plot(x, y, '.', alpha=0.8, color=colors[i] if colors else None)
+
+    return plt
     

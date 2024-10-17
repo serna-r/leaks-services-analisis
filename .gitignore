@@ -33,6 +33,8 @@ __pycache__/
 *.xlsx
 # No ignorar el excel de services
 !/services/services.xlsx
+# No ignorar el excel de risk dimensions
+!risk_dimensions.xlsx
 
 # Ignorar archivos source
 source
