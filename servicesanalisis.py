@@ -4,6 +4,12 @@ from plots import plot_all_services, plot_categories_risks, plot_box_whiskers_se
 from scipy.spatial.distance import pdist, squareform
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.metrics import silhouette_score
+from sklearn.preprocessing import LabelEncoder
+
+# Ignore warning
+from scipy.cluster.hierarchy import ClusterWarning
+from warnings import simplefilter
+simplefilter("ignore", ClusterWarning)
 
 def get_services_info(file):
     # Get the data
@@ -38,38 +44,66 @@ def get_services_risk(file):
     # Return website and risk
     return  services_risk[['Website','Type', 'Risk']]
 
-def cluster_services(df):
-   # Select only numeric binary columns
+def manual_cluster_evaluation(services):
+    # Get new dataframe
+    df = services.copy()
+    # Select only numeric binary columns for clustering
     numeric_columns = df.select_dtypes(include=['float64', 'int64']).columns
     X = df[numeric_columns]
+
+    # Encode the 'Type' column into numeric labels (e.g., "adult" -> 0, "social" -> 1)
+    label_encoder = LabelEncoder()
+    df['Type_encoded'] = label_encoder.fit_transform(df['Type'])
 
     # Calculate the pairwise Hamming distance between samples
     hamming_dist = pdist(X, metric='hamming')
 
-    # Try clustering with different numbers of clusters and calculate Silhouette Score
+    # Manual evaluation: Calculate silhouette score based on the provided 'Type' labels
+    manual_silhouette_score = silhouette_score(X, df['Type_encoded'], metric='hamming')
+
+    print(f'Manual Silhouette Score (based on Type classification): {manual_silhouette_score}')
+
+def cluster_services(df):
+    # Select only numeric binary columns
+    numeric_columns = df.select_dtypes(include=['float64', 'int64']).columns
+    X = df[numeric_columns]
+
+    # Calculate the pairwise Hamming distance between samples (this is a condensed matrix)
+    hamming_dist = pdist(X, metric='hamming')
+
+    # Convert condensed distance matrix to a square matrix for clustering
+    hamming_dist_square = squareform(hamming_dist)
+
+    # Variables to track the best Silhouette score and number of clusters
     best_n_clusters = 0
     best_score = -1
-    for n_clusters in range(2, 20):
-        agg_cluster = AgglomerativeClustering(n_clusters=n_clusters, linkage='complete', distance_threshold=None, compute_full_tree=True)
-        labels = agg_cluster.fit_predict(squareform(hamming_dist))  # squareform is needed here for fit_predict
 
-        # Since Hamming distance was used, compute the Silhouette score
-        score = silhouette_score(X, labels, metric='hamming')  # Use 'hamming' for the silhouette score metric
-        print(f"Number of clusters: {n_clusters}, Silhouette Score: {score}")
+    for n_clusters in range(2, 20):
+        # Use precomputed distance (square matrix)
+        agg_cluster = AgglomerativeClustering(n_clusters=n_clusters, linkage='complete')
         
-        # Track the best score
+        # Fit the model and get the labels
+        labels = agg_cluster.fit_predict(hamming_dist_square)  # Pass the square matrix
+        
+        # Calculate Silhouette score using Hamming distance
+        score = silhouette_score(X, labels, metric='hamming')
+        
+        # Track the best score and number of clusters
         if score > best_score:
             best_score = score
             best_n_clusters = n_clusters
 
+    # Print the best Silhouette Score and number of clusters
     print(f'Best number of clusters: {best_n_clusters}, with Silhouette Score: {best_score}')
 
-    # Now, apply clustering with the best number of clusters
-    agg_cluster = AgglomerativeClustering(n_clusters=best_n_clusters, linkage='complete', distance_threshold=None, compute_full_tree=True)
-    labels = agg_cluster.fit_predict(squareform(hamming_dist))  # Again use squareform here
+    # Re-fit the clustering with the best number of clusters
+    agg_cluster = AgglomerativeClustering(n_clusters=best_n_clusters, linkage='complete')
+    labels = agg_cluster.fit_predict(hamming_dist_square)
 
     # Add the cluster labels to the original DataFrame
     df['Cluster'] = labels
+    
+    return best_n_clusters, best_score
 
 
 def service_analisis(file):
@@ -86,11 +120,12 @@ def service_analisis(file):
     # Save csv
     sumservices.to_csv('./services/servicestypesum.csv')
 
+    # Evaluate silohuette for categories
+    manual_cluster_evaluation(services)
     # Classify all the services
     cluster_services(services)
-    print(services)
+    services.to_csv('./services/servicescluster.csv')
     
-
     # Get the risks by category
     # Get the services with the risks
     services_risk = get_services_risk('./services/risk_dimensions.xlsx')
