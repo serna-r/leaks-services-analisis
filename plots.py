@@ -6,6 +6,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.colors import to_rgba
 import matplotlib.patches as mpatches
 from datetime import datetime
+from math import pi
 
 # Get diferent colors for each type of service
 def get_colors(leak_types):
@@ -582,7 +583,7 @@ def plot_categories_risks(categories_risks):
     plt.figure(figsize=(10,6))
     cmap = plt.get_cmap('tab20')
 
-    plt.bar(categories_risks.iloc[:, 0], categories_risks['Risk'], color=cmap.colors)
+    plt.bar(categories_risks.iloc[:, 0], categories_risks['Risk sum'], color=cmap.colors)
 
     # Adding labels and title
     plt.xlabel('Category')
@@ -606,7 +607,7 @@ def plot_box_whiskers_servicesrisk(services_risk):
     labels = [x for x in labels if str(x) != 'nan']
     
     # Collect values grouped by service type
-    values = [services_risk[services_risk['Type'] == service]['Risk'].values for service in labels]
+    values = [services_risk[services_risk['Type'] == service]['Risk sum'].values for service in labels]
 
     # Create a boxplot
     plt.figure(figsize=(10, 8))
@@ -621,6 +622,37 @@ def plot_box_whiskers_servicesrisk(services_risk):
         y = values[i]
         x = np.random.normal(1 + i, 0.04, size=len(y))
         plt.plot(x, y, '.', alpha=0.8, color=colors[i] if colors else None)
+
+    return plt
+
+def plot_radar_risk_dimensions(categories_risk):
+    # Plotable values
+    plotable = categories_risk[['Physical', 'Social', 'Resources', 'Psychological', 'Prosecution', 'Career', 'Freedom']]
+    # Extract the categories (columns)
+    categories = plotable.columns.to_list()
+
+    N = len(categories)
+
+    # Create angles for the radar chart
+    angles = [n / float(N) * 2 * pi for n in range(N)]
+    angles += angles[:1]  # Complete the loop to close the chart
+
+    # Initialize the radar chart
+    fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(polar=True))
+
+    # Plot each row in the dataframe and use 'Type' as labels in the legend
+    for index, row in plotable.iterrows():
+        values = row.tolist()
+        values += values[:1]  # Complete the loop by adding the first value at the end
+        label = categories_risk['Type'].loc[index]  # Get the corresponding label from 'Type'
+        ax.plot(angles, values, linewidth=1, linestyle='solid', label=label)
+        ax.fill(angles, values, alpha=0.1)  # Fill area under the line
+
+    # Add labels to the axes
+    plt.xticks(angles[:-1], categories)
+
+    # Add legend with the 'Type' labels
+    plt.legend(loc='upper right', bbox_to_anchor=(1.1, 1.1))
 
     return plt
     
