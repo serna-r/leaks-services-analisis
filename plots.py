@@ -646,7 +646,7 @@ def plot_radar_risk_dimensions(categories_risk):
         values += values[:1]  # Complete the loop by adding the first value at the end
         label = categories_risk['Type'].loc[index]  # Get the corresponding label from 'Type'
         ax.plot(angles, values, linewidth=1, linestyle='solid', label=label)
-        ax.fill(angles, values, alpha=0.1)  # Fill area under the line
+        # ax.fill(angles, values, alpha=0.1)  # Fill area under the line
 
     # Add labels to the axes
     plt.xticks(angles[:-1], categories)
