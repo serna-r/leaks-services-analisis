@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from plots import plot_all_services, plot_categories_risks, plot_box_whiskers_servicesrisk, plot_radar_risk_dimensions
+from plots import plot_all_services, plot_categories_risks, plot_box_whiskers_servicesrisk, plot_radar_risk_dimensions, plot_service_risk_boxplots
 from scipy.spatial.distance import pdist, squareform
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.metrics import silhouette_score
@@ -8,8 +8,10 @@ from sklearn.preprocessing import LabelEncoder
 
 # Ignore warning
 from scipy.cluster.hierarchy import ClusterWarning
+from pandas.errors import SettingWithCopyWarning
 from warnings import simplefilter
 simplefilter("ignore", ClusterWarning)
+simplefilter("ignore", SettingWithCopyWarning)
 
 def get_services_info(file):
     # Get the data
@@ -214,10 +216,16 @@ def service_analisis(file):
     categories_risk = categories_group.mean(numeric_only=True)
     # Reset the index to move 'Type' from index to a column
     categories_risk = categories_risk.reset_index()
-    # Plot
-    plot_categories_risks(categories_risk).savefig('./figures/services/categories_risk.png')
-    plot_box_whiskers_servicesrisk(services_risk_dimensions).savefig('./figures/services/services_risk_boxwhiskers.png')
-    plot_radar_risk_dimensions(categories_risk).savefig('./figures/services/services_risk_radar.png')
+
+    # Plots
+    # Plot the barplot for categories with the mean
+    plot_categories_risks(categories_risk).savefig('./figures/services/bars_categories_risk.png')
+    # Boxplot for each type of service with values for dimensions
+    plot_service_risk_boxplots(services_risk_dimensions).savefig('./figures/services/boxwhiskers_services_risk_dimensions.png')
+    # Boxplot for each type of service for the sum of the dimensions
+    plot_box_whiskers_servicesrisk(services_risk_dimensions).savefig('./figures/services/boxwhisker_services_risk.png')
+    # Radar plot for types
+    plot_radar_risk_dimensions(categories_risk).savefig('./figures/services/radar_services_risk.png')
 
     # Format df for output
     services_risk_dimensions.reset_index()
@@ -226,8 +234,8 @@ def service_analisis(file):
     cols.insert(0, 'Type')
     services_risk_dimensions = services_risk_dimensions[cols]
     # Add cluster label
-    services_risk_dimensions['Cluster'] = services_only_data.set_index('Website')['Cluster']
-
+    services_risk_dimensions['Cluster'] = services_only_data.set_index('Website').loc[:, 'Cluster']
+    # Save services risk dimensions
     services_risk_dimensions.to_csv('./services/services_risk_dimensions_cluster.csv')
 
 

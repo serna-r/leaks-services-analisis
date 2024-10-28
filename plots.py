@@ -626,33 +626,93 @@ def plot_box_whiskers_servicesrisk(services_risk):
     return plt
 
 def plot_radar_risk_dimensions(categories_risk):
-    # Plotable values
-    plotable = categories_risk[['Physical', 'Social', 'Resources', 'Psychological', 'Prosecution', 'Career', 'Freedom']]
-    # Extract the categories (columns)
+    # Extract the numeric values to plot
+    plotable = categories_risk.select_dtypes(include=[np.number])[['Physical', 'Social', 'Resources', 'Psychological', 'Prosecution', 'Career', 'Freedom']]
     categories = plotable.columns.to_list()
-
     N = len(categories)
 
     # Create angles for the radar chart
     angles = [n / float(N) * 2 * pi for n in range(N)]
     angles += angles[:1]  # Complete the loop to close the chart
 
-    # Initialize the radar chart
-    fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(polar=True))
+    # Split into two DataFrames: high and low values
+    overall_mean = plotable.mean().mean()
+    top_values = plotable[plotable.mean(axis=1) > overall_mean]
+    bottom_values = plotable[plotable.mean(axis=1) <= overall_mean]
 
-    # Plot each row in the dataframe and use 'Type' as labels in the legend
-    for index, row in plotable.iterrows():
-        values = row.tolist()
-        values += values[:1]  # Complete the loop by adding the first value at the end
-        label = categories_risk['Type'].loc[index]  # Get the corresponding label from 'Type'
-        ax.plot(angles, values, linewidth=1, linestyle='solid', label=label)
-        # ax.fill(angles, values, alpha=0.1)  # Fill area under the line
+    # Define a common scale range for both charts
+    max_value = plotable.max().max()
+    min_value = plotable.min().min()
 
-    # Add labels to the axes
-    plt.xticks(angles[:-1], categories)
+    # Create the figure with two subplots
+    fig, axs = plt.subplots(1, 2, figsize=(16, 8), subplot_kw=dict(polar=True))
+    fig.suptitle("Radar Plots: High and Low Risk Values", fontsize=16)
 
-    # Add legend with the 'Type' labels
-    plt.legend(loc='upper right', bbox_to_anchor=(1.1, 1.1))
+    # Helper function to plot radar with data bubbles
+    def add_radar_chart(ax, data, title, unique_labels):
+        colors = plt.cm.plasma(np.linspace(0, 1, len(data)))  # Generate distinct colors for each line
+
+        for index, (row, color) in enumerate(zip(data.iterrows(), colors)):
+            row = row[1]
+            values = row.tolist() + row.tolist()[:1]
+            label = unique_labels[index]  # Use unique labels for each subset
+            
+            # Plot the radar line with markers for each data point
+            ax.plot(angles, values, 'o-', ms=4, mec="w", linewidth=1.5, color=color, clip_on=False, zorder=1, label=label)
+
+            # Add bubbles and larger labels for visibility
+            for angle, value in zip(angles, values):
+                ax.plot([angle], [value], 'o', ms=10, mec="w", color=color, zorder=2)  # Draw bubble
+                ax.annotate(label[0], xy=(angle, value), color="w", size=6, ha="center", va="center")  # Larger font size for initials
+
+        ax.set_ylim(min_value, max_value + 1)  # Keep a common scale for both plots, increase max
+        ax.set_xticks(angles[:-1])
+        ax.set_xticklabels(categories)
+        ax.set_title(title, fontsize=14)
+        ax.legend(loc='upper right', bbox_to_anchor=(1.3, 1.1), fontsize=10)
+
+    # Unique labels for high and low values to avoid duplication in legends
+    top_labels = categories_risk['Type'][top_values.index].unique()
+    bottom_labels = categories_risk['Type'][bottom_values.index].unique()
+
+    # Radar chart for high values
+    add_radar_chart(axs[0], top_values, 'High Values', top_labels)
+
+    # Radar chart for low values
+    add_radar_chart(axs[1], bottom_values, 'Low Values', bottom_labels)
 
     return plt
+
+
+def plot_service_risk_boxplots(df):
+    # Filter only the risk dimension columns and type
+    risk_columns = ['Physical', 'Social', 'Resources', 'Psychological', 'Prosecution', 'Career', 'Freedom']
     
+    # Calculate rows and columns for the subplots
+    num_categories = len(risk_columns)
+    nrows = (num_categories + 1) // 2  # Two columns per row
+    fig, axes = plt.subplots(nrows=nrows, ncols=2, figsize=(12, nrows * 5), sharey=True)
+    axes = axes.flatten()  # Flatten to easily iterate with a single index
+    
+    # Loop through each risk dimension to create a boxplot for each, grouped by 'Type'
+    for i, risk in enumerate(risk_columns):
+        # Plot boxplot for each risk dimension, grouped by Type
+        df.boxplot(column=risk, by='Type', ax=axes[i])
+        
+        # Set axis labels and title
+        axes[i].set_title(f'{risk} Risk')
+        axes[i].set_ylabel('Risk Value')
+        
+        # Set x-axis labels at the top and rotate them
+        axes[i].xaxis.set_label_position('top')
+        axes[i].xaxis.tick_top()
+        axes[i].set_xlabel('Service Type')
+        for label in axes[i].get_xticklabels():
+            label.set_rotation(45)
+            label.set_ha('right')  # Align labels to the right for better readability
+    
+    # Adjust layout for readability
+    plt.suptitle('Risk Values by Service Type and Risk Dimension', fontsize=16)
+    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+
+    return plt
