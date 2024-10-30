@@ -583,7 +583,12 @@ def plot_categories_risks(categories_risks):
     plt.figure(figsize=(10,6))
     cmap = plt.get_cmap('tab20')
 
-    plt.bar(categories_risks.iloc[:, 0], categories_risks['Risk sum'], color=cmap.colors)
+    # Order values
+    categories_risks = categories_risks.sort_values('Risk sum', ascending=False)
+
+    X = categories_risks.iloc[:, 0]
+    labels = categories_risks['Risk sum']
+    plt.bar(X, labels, color=cmap.colors)
 
     # Adding labels and title
     plt.xlabel('Category')
@@ -601,8 +606,9 @@ def plot_box_whiskers_servicesrisk(services_risk):
     cmap = plt.get_cmap('tab20')
     colors = cmap.colors
     
-    # Get unique service types
-    labels = services_risk['Type'].unique()
+    # Get unique service types ordered by mean
+    categories_group = services_risk.groupby('Type').mean(numeric_only=True).reset_index().sort_values('Risk sum', ascending=False)
+    labels = categories_group['Type']
     # Clean nan
     labels = [x for x in labels if str(x) != 'nan']
     
