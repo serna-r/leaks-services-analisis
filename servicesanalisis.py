@@ -84,7 +84,7 @@ def cluster_services(df):
     best_n_clusters = [0,0,0]
     best_score = [-1,-1,-1]
 
-    for n_clusters in range(2, 20):
+    for n_clusters in range(2, 12):
         # Use precomputed distance (square matrix)
         agg_cluster = AgglomerativeClustering(n_clusters=n_clusters, linkage='complete')
         
