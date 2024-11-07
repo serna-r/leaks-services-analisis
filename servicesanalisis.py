@@ -150,8 +150,6 @@ def service_analisis(file):
     plot_all_services(sumservices).savefig('./figures/services/services_data.png')
     # Plot distributions with only personal data
     plot_all_services(sumservices_only_data).savefig('./figures/services/services_personal_data.png')
-    # Save csv
-    sumservices.to_csv('./services/servicestypesum.csv')
 
     # Clusters
     # Manual clusters
@@ -170,8 +168,6 @@ def service_analisis(file):
     cluster_services(services_only_data)
     # Empty line for formating
     print('')
-    services.to_csv('./services/servicescluster.csv')
-    services_only_data.to_csv('./services/services_only_data_cluster.csv')
 
     # Data risk
     data_risk = get_data_risk()
@@ -235,6 +231,12 @@ def service_analisis(file):
     services_risk_dimensions = services_risk_dimensions[cols]
     # Add cluster label
     services_risk_dimensions['Cluster'] = services_only_data.set_index('Website').loc[:, 'Cluster']
+
+    # Save csvs for output
+    # Save services with clusters
+    services.to_csv('./services/servicescluster.csv')
+    # Save services only data with clusters
+    services_only_data.to_csv('./services/services_only_data_cluster.csv')
     # Save services risk dimensions
     services_risk_dimensions.to_csv('./services/services_risk_dimensions_cluster.csv')
 
