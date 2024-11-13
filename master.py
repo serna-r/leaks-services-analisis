@@ -9,6 +9,7 @@ from packages.write_latex import get_latex_table
 from packages.clustering import clustering
 from packages.distribution_comparison import get_distribution_comparison
 from packages.servicesanalisis import service_analisis
+from packages.leakregression import leakregression
 from datetime import datetime
 
 verbose = 0
@@ -151,7 +152,7 @@ def get_distribution_comparison_with_logging():
     elapsed_time = end_time - start_time
 
     print_and_log(f"Distribution comparison completed successfully.", log_file)
-    print_and_log("Graphs saved in figures folder", log_file)
+    print_and_log("Graphs saved in figures/leaks folder", log_file)
     print_and_log(f"Elapsed time for distribution comparison: {elapsed_time:.2f} seconds.\n", log_file)
 
 def get_latex_with_logging():
@@ -211,6 +212,24 @@ def get_serviceanalisis_with_logging():
     print_and_log("Graphs saved in figures folder", log_file)
     print_and_log(f"Elapsed time for service data analisis: {elapsed_time:.2f} seconds.\n", log_file)
 
+def get_leakregression_with_logging():
+    log_file = 'log.txt'
+
+    # Start time for the latex file generation
+    start_time = time.time()
+    print_and_log("Starting leak regression ...", log_file)
+
+    # Call leak regression
+    leakregression()
+
+    # End time for the process
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+
+    print_and_log(f"Leak regression completed successfully.", log_file)
+    print_and_log("Graphs saved in figures/leakregression folder", log_file)
+    print_and_log(f"Elapsed time for service data analisis: {elapsed_time:.2f} seconds.\n", log_file)
+
 
 def print_help():
     print("Usage: python master.py [option]")
@@ -243,6 +262,8 @@ def main():
                get_cluster_with_logging() 
         elif option in ['-sa', '--serviceanalisis']:
             get_serviceanalisis_with_logging()
+        elif option in ['-lr', '--leakregression']:
+            get_leakregression_with_logging()
         elif option in ['-h', '--help']:
             print_help()
         else:

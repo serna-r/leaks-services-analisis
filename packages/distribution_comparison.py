@@ -10,7 +10,7 @@ from packages.plots import get_colors, plot_distributions, plot_matrix, plot_sco
 warnings.simplefilter(action='ignore', category=FutureWarning)
 warnings.simplefilter(action='ignore', category=RuntimeWarning)
 
-figures_folder = 'figures/'
+FIGURES_FOLDER = 'figures/leaks/'
 length = False
 
 def compute_kl_matrix(distributions, names):  
@@ -108,17 +108,17 @@ def get_distribution_comparison(leaks_file='leak_types.txt'):
         # Plot matrices
         plot_by_length(leak_names, kl_dfs_mask, kl_dfs_score_length, figures_folder = 'figures/')
         # Plot and save the score by length distribution
-        plot_scores_by_length(score_length_dataframes, leak_names, colors_leaks).savefig(figures_folder + 'bars/scores_length_distribution.png')
+        plot_scores_by_length(score_length_dataframes, leak_names, colors_leaks).savefig(FIGURES_FOLDER + 'bars/scores_length_distribution.png')
 
 
     # Plot and save the score distributions
-    plot_distributions(score_distributions, leak_names, colors_leaks, colors_categories=colors_categories, categories=leak_categories).savefig(figures_folder + 'bars/scores_distribution.png')
+    plot_distributions(score_distributions, leak_names, colors_leaks, colors_categories=colors_categories, categories=leak_categories).savefig(FIGURES_FOLDER + 'bars/scores_distribution.png')
     # Plot and save the kl score matrix
-    plot_matrix(kl_df_score.values, leak_names, 'coolwarm', vmin=0, vmax=1).savefig(figures_folder + 'klmatrices/scores_kl_matrix.png')
+    plot_matrix(kl_df_score.values, leak_names, 'coolwarm', vmin=0, vmax=1).savefig(FIGURES_FOLDER + 'klmatrices/scores_kl_matrix.png')
     # Get box and whiskers plot for values in the score kl matrix
-    boxwhiskers_from_kl_matrix(kl_df_score).savefig(figures_folder + 'boxwhiskers/score_boxwhiskers_klmatrix.png')
+    boxwhiskers_from_kl_matrix(kl_df_score).savefig(FIGURES_FOLDER + 'boxwhiskers/score_boxwhiskers_klmatrix.png')
     # Get scatter from values
-    random_scatterplot_klmatrices([kl_df_score], ['All values']).savefig(figures_folder + 'scatter/score_scatter_klmatrix.png')
+    random_scatterplot_klmatrices([kl_df_score], ['All values']).savefig(FIGURES_FOLDER + 'scatter/score_scatter_klmatrix.png')
 
     kl_matrices_categories = []
     # Get stats for each category
@@ -130,18 +130,18 @@ def get_distribution_comparison(leaks_file='leak_types.txt'):
         # Add matrix to category matrices
         kl_matrices_categories.append(category_df)
         # Plot category matrix
-        plot_matrix(category_df.values, leaks_in_category, 'coolwarm', vmin=0, vmax=1).savefig(f'{figures_folder}/klmatrices/c_{category}_scores_kl_matrix.png')
+        plot_matrix(category_df.values, leaks_in_category, 'coolwarm', vmin=0, vmax=1).savefig(f'{FIGURES_FOLDER}/klmatrices/c_{category}_scores_kl_matrix.png')
 
     # Plot box and whiskers for each category
-    boxwhiskers_from_kl_matrices(kl_matrices_categories, leak_categories, colors_categories).savefig(figures_folder + 'boxwhiskers/categories_boxwhiskers_klmatrices.png')
+    boxwhiskers_from_kl_matrices(kl_matrices_categories, leak_categories, colors_categories).savefig(FIGURES_FOLDER + 'boxwhiskers/categories_boxwhiskers_klmatrices.png')
     # Scatterplot without box whiskers
-    random_scatterplot_klmatrices(kl_matrices_categories, leak_categories, colors_categories).savefig(figures_folder + 'scatter/categories_scatter_klmatrices.png')
+    random_scatterplot_klmatrices(kl_matrices_categories, leak_categories, colors_categories).savefig(FIGURES_FOLDER + 'scatter/categories_scatter_klmatrices.png')
     plt.close()
 
-    plot_by_year(score_distributions, leak_names, colors_leaks, dates_list).savefig(figures_folder + 'years/years_combined.png')
+    plot_by_year(score_distributions, leak_names, colors_leaks, dates_list).savefig(FIGURES_FOLDER + 'years/years_combined.png')
     plt.close()
 
-    plot_by_year_average(score_distributions, leak_names, colors_leaks, dates_list).savefig(figures_folder + 'years/years_combined_averaged.png')
+    plot_by_year_average(score_distributions, leak_names, colors_leaks, dates_list).savefig(FIGURES_FOLDER + 'years/years_combined_averaged.png')
 
 
 if __name__ == '__main__':

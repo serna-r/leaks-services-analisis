@@ -11,6 +11,7 @@ from packages.retrieve_stats import get_count_and_probabilities, get_leak_types
 verbose = 0
 OUTPUTFOLDER = './clusters/'
 FINALKMEANS = 6
+FIGURES_FOLDER = './figures/cluster/'
 
 
 def get_leaks_and_probabilities(leak_types):
@@ -153,10 +154,10 @@ def get_kmeans(leak_names, leak_types,  leak_probabilities):
     # Get elbow for kmeans
     number_leaks, elbowplot = get_elbow_kmeans(leak_names, leak_probabilities)
     # Save elbow figure for sse
-    elbowplot.savefig('./figures/kmeans/elbow.png')
+    elbowplot.savefig(FIGURES_FOLDER + 'kmeans/elbow.png')
     plt.close()
     # Save  figure for silhouette
-    get_silhouette_kmeans(leak_names, leak_probabilities).savefig('./figures/kmeans/silhouette_kmeans.png')
+    get_silhouette_kmeans(leak_names, leak_probabilities).savefig(FIGURES_FOLDER + 'kmeans/silhouette_kmeans.png')
 
     plt.close()
 
@@ -165,11 +166,11 @@ def get_kmeans(leak_names, leak_types,  leak_probabilities):
         sse, kmeans_data, centroids = execute_kmeans(leak_types, leak_names, leak_probabilities, k=i)
 
         categories = [data[1] for data in kmeans_data]
-        plot_5d_scatter(leak_names, leak_probabilities, categories, centroids).savefig(f"./figures/kmeans/services_5d_scatter_{i}.png")
+        plot_5d_scatter(leak_names, leak_probabilities, categories, centroids).savefig(f"{FIGURES_FOLDER}kmeans/services_5d_scatter_{i}.png")
         plt.close()
 
         # Plot kmeans
-        plot_kmeans(kmeans_data, sse).savefig(f'./figures/kmeans/kmeans_k{i}.png')
+        plot_kmeans(kmeans_data, sse).savefig(f'{FIGURES_FOLDER}kmeans/kmeans_k{i}.png')
         plt.close()
 
 def manual_cluster_labels(leak_types):
@@ -324,7 +325,7 @@ def clustering(leaks_file, kmeans=False):
     # Get names and probabilities
     leak_names, leak_probabilities = get_leaks_and_probabilities(leak_types)
     # Plot 4d scatter of the leaks
-    plot_5d_scatter(leak_names, leak_probabilities).savefig("./figures/scatter/services_5d_scatter.png")
+    plot_5d_scatter(leak_names, leak_probabilities).savefig(FIGURES_FOLDER + "scatter/services_5d_scatter.png")
     plt.close()
 
     # If needed apply kmeans to get the best k
@@ -336,29 +337,29 @@ def clustering(leaks_file, kmeans=False):
     # Call manual clustering
     manualCluster = ClusterEvaluation(leak_names, numerical_labels, leak_probabilities)
     manualCluster.evaluate()
-    manualCluster.plot_silhouette(vmin=-0.7,vmax=0.7).savefig("./figures/bars/silohuetteManual.png")
+    manualCluster.plot_silhouette(vmin=-0.7,vmax=0.7).savefig(FIGURES_FOLDER + "bars/silohuetteManual.png")
     # Print measures
     print(f"Manual Measures")
     print(manualCluster, "\n")
     # Save indexes in file
     with open(OUTPUTFOLDER + 'manualcluster_evaluation.txt', 'w') as f: f.write(str(manualCluster))
     # Plot manual cluster
-    plot_5d_scatter(leak_names, leak_probabilities, numerical_labels).savefig("./figures/scatter/services_5d_manualcluster_scatter.png")
+    plot_5d_scatter(leak_names, leak_probabilities, numerical_labels).savefig(FIGURES_FOLDER + "scatter/services_5d_manualcluster_scatter.png")
     plt.close()
 
     # Execute kmeans FINALKMEANS
     sse, cluster_list, centroidsKmeans = execute_kmeans(leak_types, leak_names, leak_probabilities, FINALKMEANS)
     kmeansCluster = ClusterEvaluation(leak_names, [item[1] for item in cluster_list], leak_probabilities)
     kmeansCluster.evaluate()
-    kmeansCluster.plot_silhouette(vmin=-0.7,vmax=0.7).savefig(f"./figures/bars/silohuetteKmeans{FINALKMEANS}.png")
+    kmeansCluster.plot_silhouette(vmin=-0.7,vmax=0.7).savefig(f"{FIGURES_FOLDER}bars/silohuetteKmeans{FINALKMEANS}.png")
     # Plot bars cluster sorted
     sorted_kmeans = sorted(list(zip(leak_types, kmeansCluster.numerical_labels, leak_probabilities)), key=lambda x: x[1])
-    plot_kmeans(sorted_kmeans, kmeansCluster.ssw, default_sort=False).savefig(f"./figures/kmeans/kmeans_k{FINALKMEANS}_sorted.png")
+    plot_kmeans(sorted_kmeans, kmeansCluster.ssw, default_sort=False).savefig(f"{FIGURES_FOLDER}kmeans/kmeans_k{FINALKMEANS}_sorted.png")
     # Print stats for kmeans
     print(f"Kmeans {FINALKMEANS} Measures")
     print(kmeansCluster, "\n")
     # Plot kmeans scatter
-    plot_5d_scatter(leak_names, leak_probabilities, kmeansCluster.numerical_labels, centroidsKmeans).savefig("./figures/scatter/services_5d_kmeanscluster_scatter.png")
+    plot_5d_scatter(leak_names, leak_probabilities, kmeansCluster.numerical_labels, centroidsKmeans).savefig(f"{FIGURES_FOLDER}scatter/services_5d_kmeanscluster_scatter.png")
 
     # Save indexes in file
     with open(OUTPUTFOLDER + f'kmeans{FINALKMEANS}cluster_evaluation.txt', 'w') as f: f.write(str(kmeansCluster))
