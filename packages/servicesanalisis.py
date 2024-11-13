@@ -18,8 +18,14 @@ def get_services_info(file):
     services = pd.read_excel(file)
     
     # Fill empty cells with 0s
-    numeric_columns = services.select_dtypes(include=['float64', 'int64']).columns
-    services[numeric_columns] = services[numeric_columns].fillna(0)
+    # Specify the columns by their index positions (7 to 29, inclusive)
+    target_columns = services.columns[7:30]  # Python slicing is exclusive at the end, so we use 30
+
+    # Convert all target columns to numeric, coercing errors to NaN if they are non-numeric
+    services[target_columns] = services[target_columns].apply(pd.to_numeric, errors='coerce')
+
+    # Now fill NaN values in those columns with 0
+    services[target_columns] = services[target_columns].fillna(0)
 
     return  services
 
@@ -46,7 +52,6 @@ def get_sumservices(services):
 def get_data_risk():
     # Get the data
     services_risk = pd.read_excel('./services/risk_dimensions.xlsx', sheet_name='privacy values clean', header=0)
-    
     return services_risk
 
 
@@ -138,6 +143,7 @@ def service_analisis(file):
     # Get the data
     services = get_services_info(file)
     services_only_data = services.iloc[: ,12:30]
+    print(services_only_data.dtypes)
     services_only_data[['Type', 'Website']] = services[['Type', 'Website']].copy()
 
     print(f"\nServices columns: {services.columns.to_list()} \n\nServices only data columns: {services_only_data.columns.to_list()}\n")
@@ -174,15 +180,14 @@ def service_analisis(file):
     data_risk['Total risk'] = data_risk.sum(axis=1, numeric_only=True)
 
     # Select the relevant columns from both dataframes
-    risk_columns = services_only_data.select_dtypes(include=['float64', 'int64']).columns.to_list()
-    risk_columns.remove('Cluster')
+    risk_columns = data_risk.select_dtypes(include=['float64', 'int64']).columns.to_list()
+    risk_columns.remove('Total risk')
     data_risks_numeric = data_risk[risk_columns]
     data_risks_numeric_max = data_risks_numeric.max().to_frame().T
     services_only_data_numeric = services_only_data[risk_columns]
 
     # Perform matrix multiplication for each service
     result_sum = {}
-    result_max_sum = {}
     for idx, service in services_only_data.iterrows():
         # Multiply data_risk_risks rows by the service vector (element-wise multiplication)
         multiplied = data_risks_numeric * services_only_data_numeric.iloc[idx].values
@@ -194,19 +199,17 @@ def service_analisis(file):
         
         # Store the result with the service's name
         result_sum[service['Website']] = risk_sum.values
-        result_max_sum[service['Website']] = risk_max_sum
 
     # Convert the result dictionary into a DataFrame for better readability
     services_risk_dimensions = pd.DataFrame(result_sum, index=data_risk['Risk dimension']).transpose()
     services_risk_dimensions.index.name = 'Website'
     services_risk_dimensions['Type'] = services_only_data.set_index('Website')['Type']
-    # Add max sum
-    services_risk_dimensions['Max_sum'] = pd.DataFrame(result_max_sum).transpose()
-
-    print(f'Maximum for each dimension \n{services_risk_dimensions.max().to_frame().T}')
 
     # Get total risk
     services_risk_dimensions['Risk sum'] = services_risk_dimensions.sum(axis=1, numeric_only = True)
+
+    print(f'Maximum for each dimension \n{services_risk_dimensions.max().to_frame().T}')
+
     # Group risks by category and get mean
     categories_group = services_risk_dimensions.groupby('Type')
     categories_risk = categories_group.mean(numeric_only=True)
