@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from parallelprocessing import parallel_proc_all, parallel_proc_one
+from packages.parallelprocessing import parallel_proc_all, parallel_proc_one
 
 verbose = 0
 top_100_passwords = []

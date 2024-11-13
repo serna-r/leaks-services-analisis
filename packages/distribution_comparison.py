@@ -3,8 +3,8 @@ import numpy as np
 from scipy.stats import entropy
 import pandas as pd
 import warnings
-from retrieve_stats import get_count_and_probabilities, get_mask_distribution, get_score_and_length, get_leak_types
-from plots import get_colors, plot_distributions, plot_matrix, plot_scores_by_length, boxwhiskers_from_kl_matrix, plot_by_length, boxwhiskers_from_kl_matrices, random_scatterplot_klmatrices, plot_by_year, plot_by_year_average
+from packages.retrieve_stats import get_count_and_probabilities, get_mask_distribution, get_score_and_length, get_leak_types
+from packages.plots import get_colors, plot_distributions, plot_matrix, plot_scores_by_length, boxwhiskers_from_kl_matrix, plot_by_length, boxwhiskers_from_kl_matrices, random_scatterplot_klmatrices, plot_by_year, plot_by_year_average
 
 # Suppress the FutureWarning and the runtime one
 warnings.simplefilter(action='ignore', category=FutureWarning)

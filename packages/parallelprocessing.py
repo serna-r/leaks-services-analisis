@@ -1,7 +1,7 @@
 import concurrent.futures
 import pandas as pd
 from functools import partial
-from stats import apply_all_in_one, apply_one
+from packages.stats import apply_all_in_one, apply_one
 
 # Number of chunks or chunk size
 chunk_size = 1000  # Adjust chunk size based on your needs

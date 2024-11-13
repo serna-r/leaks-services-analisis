@@ -16,8 +16,8 @@ def apply_all_in_one(password):
 
 # Apply only one stat
 def apply_one(password, metric):
-    current_module = __import__(__name__)
-    return getattr(current_module, metric)(password) 
+    from packages import stats
+    return getattr(stats, metric)(password) 
 
 
 def load_top_100(file_path):

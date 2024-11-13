@@ -1,4 +1,4 @@
-#bookin password_strength
+bookin password_strength
 #canva password_strength
 #chegg password_strength
 #dubshmash password_strength
@@ -20,7 +20,7 @@
 #kickstarter password_strength
 #lekoolgames password_strength
 
-edmodo password_strength
+#edmodo password_strength
 #mixfiend password_strength
 #psiho password_strength
 #htcmania password_strength

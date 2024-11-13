@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 import re
-import modes
+import packages.modes as modes
 
 verbose = 0
 

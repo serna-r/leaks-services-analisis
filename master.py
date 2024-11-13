@@ -2,13 +2,13 @@ import os
 import sys
 import time
 import traceback
-from dataextract import read_files_in_folder
-from dataanalisis import statistics
-from dataanalisis import one_stat
-from write_latex import get_latex_table
-from clustering import clustering
-from distribution_comparison import get_distribution_comparison
-from servicesanalisis import service_analisis
+from packages.dataextract import read_files_in_folder
+from packages.dataanalisis import statistics
+from packages.dataanalisis import one_stat
+from packages.write_latex import get_latex_table
+from packages.clustering import clustering
+from packages.distribution_comparison import get_distribution_comparison
+from packages.servicesanalisis import service_analisis
 from datetime import datetime
 
 verbose = 0
@@ -80,7 +80,7 @@ def process_leak(data_leak_name, log_file):
     print_and_log(f"Processing data leak: {data_leak_name}, mode: {mode}", log_file)
 
     # Define the directory path based on the provided name
-    data_leak_dir = os.path.join(os.getcwd(), 'leaks/' + data_leak_name)
+    data_leak_dir = os.path.join(os.getcwd(), 'leaks' , data_leak_name)
 
     # Check if the directory exists
     if not os.path.isdir(data_leak_dir):

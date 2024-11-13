@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from plots import plot_all_services, plot_categories_risks, plot_box_whiskers_servicesrisk, plot_radar_risk_dimensions, plot_service_risk_boxplots
+from packages.plots import plot_all_services, plot_categories_risks, plot_box_whiskers_servicesrisk, plot_radar_risk_dimensions, plot_service_risk_boxplots
 from scipy.spatial.distance import pdist, squareform
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.metrics import silhouette_score

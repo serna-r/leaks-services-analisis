@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from sklearn.metrics import silhouette_score, silhouette_samples
 from sklearn.metrics import davies_bouldin_score
-from plots import plot_kmeans, plot_5d_scatter
-from retrieve_stats import get_count_and_probabilities, get_leak_types
+from packages.plots import plot_kmeans, plot_5d_scatter
+from packages.retrieve_stats import get_count_and_probabilities, get_leak_types
 
 verbose = 0
 OUTPUTFOLDER = './clusters/'
