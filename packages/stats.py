@@ -8,7 +8,7 @@ def apply_all_in_one(password):
     simpleentropy = simple_entropy(password)
     shannonentropy = shannon_entropy(password)
     length = len(password)
-    load_top_100(file_path='top100.txt')
+    load_top_100(file_path='packages/top100.txt')
     common = is_common_password(password)
     score , guesses = password_strength(password)
 
