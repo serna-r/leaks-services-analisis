@@ -46,8 +46,6 @@ source
 *.csv
 # Incluir matriz kl de scores
 !kl_df_score.csv
-# Incluir datos de servicios
-!servicestypesum.csv
 
 # Ignorar scripts de prueba
 tests.py
