@@ -1,7 +1,7 @@
-bookin password_strength
+booking password_strength
 #canva password_strength
 #chegg password_strength
-#dubshmash password_strength
+#dubsmash password_strength
 #hautelook password_strength
 #linkedin password_strength
 #mate1 password_strength

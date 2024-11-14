@@ -722,3 +722,15 @@ def plot_service_risk_boxplots(df):
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
 
     return plt
+
+
+def plot_regression(X,Y,model,slope,intercept):
+    # Plotting
+    plt.scatter(X, Y, color='blue', label='Data Points')
+    plt.plot(X, model.predict(X), color='red', label=f'Regression Line: y={slope:.2f}x + {intercept:.2f}')
+    plt.xlabel('Mean score')
+    plt.ylabel('Risk')
+    plt.title('Linear Regression')
+    plt.legend()
+    
+    return plt

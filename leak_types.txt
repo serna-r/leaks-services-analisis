@@ -1,7 +1,7 @@
-bookin          business 01/12/2018
+booking          business 01/12/2018
 canva           digitaltool 24/05/2019
 chegg           digitaltool 28/04/2018
-dubshmash       social 01/12/2018
+dubsmash       social 01/12/2018
 hautelook       shopping 07/08/2018
 linkedin        social 05/05/2012
 mate1           social 29/02/2016

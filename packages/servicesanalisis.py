@@ -143,7 +143,6 @@ def service_analisis(file):
     # Get the data
     services = get_services_info(file)
     services_only_data = services.iloc[: ,12:30]
-    print(services_only_data.dtypes)
     services_only_data[['Type', 'Website']] = services[['Type', 'Website']].copy()
 
     print(f"\nServices columns: {services.columns.to_list()} \n\nServices only data columns: {services_only_data.columns.to_list()}\n")
@@ -238,9 +237,7 @@ def service_analisis(file):
     # Save csvs for output
     # Save services with clusters
     services.to_csv('./services/servicescluster.csv')
-    # Save services only data with clusters
-    services_only_data.to_csv('./services/services_only_data_cluster.csv')
-    # Save services risk dimensions
+    # Save services risk dimensions with only data clusters
     services_risk_dimensions.to_csv('./services/services_risk_dimensions_cluster.csv')
 
 

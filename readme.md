@@ -31,7 +31,7 @@
         Conduct analysis on service-specific data from leaks.
     </li>
     <li><code>-lr --leakregression</code>:
-        Perform regression analysis between password strength and risk values in leaks.
+        Perform regression analysis between password strength and risk values in leaks. Gets leaks from <code>leak_types.txt</code>. Previously execute service analysis
     </li>
     <li><code>-h --help</code>:
         Display help menu.
