@@ -10,8 +10,11 @@ from packages.plots import get_colors, plot_distributions, plot_matrix, plot_sco
 warnings.simplefilter(action='ignore', category=FutureWarning)
 warnings.simplefilter(action='ignore', category=RuntimeWarning)
 
+# Figures storage
 FIGURES_FOLDER = 'figures/leaks/'
-length = False
+
+# Boolean to choose analysis by length
+LENGTH = False
 
 def compute_kl_matrix(distributions, names):  
     num_distributions = len(distributions)
@@ -82,7 +85,7 @@ def get_distribution_comparison(leaks_file='leak_types.txt'):
 
         # Only execute if score by length is needed
         # Define the path to the txt file
-        if length:
+        if LENGTH:
             leak_scores_and_length_file = 'leaks\\' + leak + '\password_score_and_length.txt'
             score_length_df = get_score_and_length(leak_scores_and_length_file)
             score_length_dataframes.append(score_length_df)
@@ -100,7 +103,7 @@ def get_distribution_comparison(leaks_file='leak_types.txt'):
     colors_leaks, colors_categories = get_colors(leak_types)
 
     # Unused. Useful to plot by length scores and masks
-    if length:
+    if LENGTH:
         # Get kl matrix for mask and length
         kl_dfs_mask = compute_kl_matrix_dfs(mask_dataframes, leak_names, 'mask')
         # Get kl matrix for score and length, format np to eliminate np.float values

@@ -14,12 +14,30 @@
 
 <h2>Available Options:</h2>
 <ul>
-    <li><code>-s --stats</code>: Process leaks and gather statistics (from <code>leaks.txt</code>).</li>
-    <li><code>-d --distributioncomparison</code>: Get distribution comparison (from <code>leak_types.txt</code>). <br/>(Note: Ensure <code>stats.txt</code> and <code>password_score_and_length.txt</code> files are generated or in the correct location.)</li>
-    <li><code>-l --latex</code>: Make a latex file in the latex folder with important data (file leak_types.txt)</li>
-    <li><code>-c --cluster</code>: Execute the cluster module</li>
-    <li><code>-h --help</code>: Display help menu.</li>
+    <li><code>-s --stats</code>:
+        Process leaks and gather statistics (from <code>leaks.txt</code>).
+    </li>
+    <li><code>-d --distributioncomparison</code>:
+        Get distribution comparison (from <code>leak_types.txt</code>).<br/>
+        <span style="margin-left: 20px;">(Note: Ensure <code>stats.txt</code> and <code>password_score_and_length.txt</code> files are generated or in the correct location.)</span>
+    </li>
+    <li><code>-l --latex</code>:
+        Generate a LaTeX file in the latex folder with important data (from <code>leak_types.txt</code>).
+    </li>
+    <li><code>-c --cluster</code>:
+        Execute the clustering module. For K-means clustering, append <code>kmeans</code> after the option.
+    </li>
+    <li><code>-sa --serviceanalisis</code>:
+        Conduct analysis on service-specific data from leaks.
+    </li>
+    <li><code>-lr --leakregression</code>:
+        Perform regression analysis between password strength and risk values in leaks.
+    </li>
+    <li><code>-h --help</code>:
+        Display help menu.
+    </li>
 </ul>
+
 
 <h1>Format for <code>leaks.txt</code></h1>
 <p>Each line should be in the format: <code>&lt;leakname&gt; &lt;stat&gt; &lt;extraction mode&gt;</code>. Lines starting with <code>#</code> are ignored. Example:</p>
