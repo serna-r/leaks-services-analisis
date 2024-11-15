@@ -170,8 +170,7 @@ def evaluate_compliance(min_length, min_mask, extra_sec):
         compliance += 1
     
     # Policy 2: Minimum Length
-    if min_length >= 8:
-        compliance += 1
+    compliance += min_length - 7
     
     # Policy 3: No Composition Rules
     if min_mask.lower() == 'l':  # l means no composition rules required
