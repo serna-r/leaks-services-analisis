@@ -9,6 +9,7 @@ CSV_FILE_RISK = 'services\services_risk_dimensions_cluster.csv'
 FIGURES_FOLDER = 'figures\leakregression'
 
 def regression(data):
+    """Fuction to create a regression from a dict and print results"""
 
     # Split data into X and Y
     X = np.array([val[0] for val in data.values()]).reshape(-1, 1)  # Mean
@@ -32,7 +33,7 @@ def regression(data):
 
 
 def leakregression(leaks_file='leak_types.txt'):
-    """Function to create a regression between password strength in the leaks and their risk value"""
+    """Function to get the data from the leaks and create a regression between password strength in the leaks and their risk value"""
     # Get leaks
     leak_types = get_leak_types(leaks_file)
     leak_names = [x for x,y in leak_types]
@@ -45,6 +46,9 @@ def leakregression(leaks_file='leak_types.txt'):
     # Get the services corresponding to the leaks
     services_risks = services_risks.loc[services_risks['Website'].str.lower().isin([x.lower() for x in leak_names])]
     services_risks.reset_index(inplace=True)
+    services_risks = services_risks.drop('index', axis=1)
+
+    print("Leaks risk:\n", services_risks)
 
     # Calculate mean score for each leak
     leaks_score_risk = {}

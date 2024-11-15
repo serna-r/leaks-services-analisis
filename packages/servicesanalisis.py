@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from packages.plots import plot_all_services, plot_categories_risks, plot_box_whiskers_servicesrisk, plot_radar_risk_dimensions, plot_service_risk_boxplots
+from packages.plots import plot_all_services, plot_categories_risks, plot_box_whiskers_servicesrisk, plot_radar_risk_dimensions, plot_service_risk_boxplots, boxplot_nist_compliance
 from scipy.spatial.distance import pdist, squareform
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.metrics import silhouette_score
@@ -138,24 +138,7 @@ def cluster_services(df):
     
     return best_n_clusters, best_score
 
-
-def service_analisis(file):
-    # Get the data
-    services = get_services_info(file)
-    services_only_data = services.iloc[: ,12:30]
-    services_only_data[['Type', 'Website']] = services[['Type', 'Website']].copy()
-
-    print(f"\nServices columns: {services.columns.to_list()} \n\nServices only data columns: {services_only_data.columns.to_list()}\n")
-
-    # Get the data collected by category
-    # Choose relevant columns
-    sumservices = get_sumservices(services)
-    sumservices_only_data = get_sumservices(services_only_data)
-    # Plot distributions with all data
-    plot_all_services(sumservices).savefig('./figures/services/services_data.png')
-    # Plot distributions with only personal data
-    plot_all_services(sumservices_only_data).savefig('./figures/services/services_personal_data.png')
-
+def get_services_clusters(services, services_only_data):
     # Clusters
     # Manual clusters
     # Evaluate silohuette for categories
@@ -174,6 +157,61 @@ def service_analisis(file):
     # Empty line for formating
     print('')
 
+    return
+
+# Evaluate based on nist policies
+def evaluate_compliance(min_length, min_mask, extra_sec):
+    """Function to evaluate compliance for a single service"""
+    compliance = 0
+    max_compliance = 3  # Total number of policies
+    
+    # Policy 1: Blocklist Requirement
+    if extra_sec == 1:
+        compliance += 1
+    
+    # Policy 2: Minimum Length
+    if min_length >= 8:
+        compliance += 1
+    
+    # Policy 3: No Composition Rules
+    if min_mask.lower() == 'l':  # l means no composition rules required
+        compliance += 1
+    
+    # Calculate compliance score
+    compliance_score = compliance / max_compliance
+    return compliance_score
+
+
+def service_analisis(file):
+    # Get the data
+    services = get_services_info(file)
+    services_only_data = services.iloc[: ,12:30]
+    services_only_data[['Type', 'Website']] = services[['Type', 'Website']].copy()
+
+    print(f"\nServices columns: {services.columns.to_list()} \n\nServices only data columns: {services_only_data.columns.to_list()}\n")
+
+    # Get the data collected by category
+    # Choose relevant columns
+    sumservices = get_sumservices(services)
+    sumservices_only_data = get_sumservices(services_only_data)
+    # Plot distributions with all data
+    plot_all_services(sumservices).savefig('./figures/services/services_data.png')
+    # Plot distributions with only personal data
+    plot_all_services(sumservices_only_data).savefig('./figures/services/services_personal_data.png')
+
+    # Apply clusters
+    get_services_clusters(services, services_only_data)
+
+    # Nist compliance
+    services['NIST Compliance Score'] = services.apply(
+    lambda row: evaluate_compliance(row['min length'], row['min mask'], row['extra sec']),
+    axis=1)
+    # Describe the column with summary statistics
+    print(f'NIST Compliance:\nMean: {services["NIST Compliance Score"].mean():3f}\nSTD: {services["NIST Compliance Score"].std():3f}\n')
+    # Plot the compliances
+    boxplot_nist_compliance(services).savefig('./figures/services/nist_compliance_boxplot.png')
+    
+
     # Data risk
     data_risk = get_data_risk()
     data_risk['Total risk'] = data_risk.sum(axis=1, numeric_only=True)
@@ -182,7 +220,6 @@ def service_analisis(file):
     risk_columns = data_risk.select_dtypes(include=['float64', 'int64']).columns.to_list()
     risk_columns.remove('Total risk')
     data_risks_numeric = data_risk[risk_columns]
-    data_risks_numeric_max = data_risks_numeric.max().to_frame().T
     services_only_data_numeric = services_only_data[risk_columns]
 
     # Perform matrix multiplication for each service
@@ -190,11 +227,9 @@ def service_analisis(file):
     for idx, service in services_only_data.iterrows():
         # Multiply data_risk_risks rows by the service vector (element-wise multiplication)
         multiplied = data_risks_numeric * services_only_data_numeric.iloc[idx].values
-        multiplied_max = data_risks_numeric_max * services_only_data_numeric.iloc[idx].values
         
         # Sum the results for each risk dimension
         risk_sum = multiplied.sum(axis=1)
-        risk_max_sum = multiplied_max.sum(axis=1)
         
         # Store the result with the service's name
         result_sum[service['Website']] = risk_sum.values
@@ -207,7 +242,7 @@ def service_analisis(file):
     # Get total risk
     services_risk_dimensions['Risk sum'] = services_risk_dimensions.sum(axis=1, numeric_only = True)
 
-    print(f'Maximum for each dimension \n{services_risk_dimensions.max().to_frame().T}')
+    print(f'Maximum for each dimension \n{services_risk_dimensions.max().to_frame().T}\n')
 
     # Group risks by category and get mean
     categories_group = services_risk_dimensions.groupby('Type')
@@ -232,7 +267,9 @@ def service_analisis(file):
     cols.insert(0, 'Type')
     services_risk_dimensions = services_risk_dimensions[cols]
     # Add cluster label
-    services_risk_dimensions['Cluster'] = services_only_data.set_index('Website').loc[:, 'Cluster']
+    services_risk_dimensions['Only data cluster'] = services_only_data.set_index('Website').loc[:, 'Cluster']
+    # Add NIST Compliance
+    services_risk_dimensions['NIST Compliance Score'] = services.set_index('Website').loc[:, 'NIST Compliance Score']
 
     # Save csvs for output
     # Save services with clusters

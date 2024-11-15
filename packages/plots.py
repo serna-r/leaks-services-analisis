@@ -734,3 +734,37 @@ def plot_regression(X,Y,model,slope,intercept):
     plt.legend()
     
     return plt
+
+def boxplot_nist_compliance(df):
+    # Group data by type for the plot
+    categories_group = df.groupby('Type').mean(numeric_only=True).reset_index().sort_values('NIST Compliance Score', ascending=False)
+    labels = categories_group['Type']
+
+    # Clean NaNs
+    labels = [x for x in labels if str(x) != 'nan']
+
+    # Collect compliance scores grouped by type
+    values = [df[df['Type'] == service_type]['NIST Compliance Score'].values for service_type in labels]
+
+    # Get colors
+    cmap = plt.get_cmap('tab20')
+    colors = cmap.colors
+
+    # Create a boxplot
+    plt.figure(figsize=(10, 8))
+    plt.boxplot(values, showmeans=True)
+    plt.title('Box-and-Whiskers Plot of NIST Compliance by Service Type')
+    plt.ylabel('Compliance Score')
+    plt.xticks(np.array([i for i in range(len(labels))]) + 1, labels, rotation=45, ha='right', fontsize=8)
+    plt.grid(True)
+
+    # Add scatter plot of individual points, color-coded
+    for i in range(len(labels)):
+        y = values[i]
+        x = np.random.normal(1 + i, 0.04, size=len(y))  # Scatter around the boxplot positions
+        plt.plot(x, y, '.', alpha=0.8, color=colors[i % len(colors)] if colors else None)
+
+    # Show the plot
+    plt.tight_layout()
+
+    return plt
