@@ -724,16 +724,27 @@ def plot_service_risk_boxplots(df):
     return plt
 
 
-def plot_regression(X,Y,model,slope,intercept):
-    # Plotting
+def plot_regression(X, Y, model, slope, intercept, label):
+    """Function to plot regression line and data points"""
+    # Ensure slope and intercept are scalars
+    slope_scalar = slope.item() if hasattr(slope, 'item') else slope
+    intercept_scalar = intercept.item() if hasattr(intercept, 'item') else intercept
+    
+    # Plot data points
     plt.scatter(X, Y, color='blue', label='Data Points')
-    plt.plot(X, model.predict(X), color='red', label=f'Regression Line: y={slope:.2f}x + {intercept:.2f}')
-    plt.xlabel('Mean score')
-    plt.ylabel('Risk')
-    plt.title('Linear Regression')
+    
+    # Plot regression line
+    plt.plot(X, model.predict(X), color='red', label=f'Regression Line: y={slope_scalar:.2f}x + {intercept_scalar:.2f}')
+    
+    # Add labels and legend
+    plt.title(f"Regression Plot: {label}")
+    plt.xlabel("X (Independent Variable)")
+    plt.ylabel("Y (Dependent Variable)")
     plt.legend()
     
+    # Return plot
     return plt
+
 
 def boxplot_nist_compliance(df):
     # Group data by type for the plot
