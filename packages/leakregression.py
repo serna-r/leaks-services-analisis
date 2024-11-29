@@ -67,7 +67,7 @@ def multivariate_regression(df, label, xlabel, ylabel):
     # Re-run with only important coefficients
 
     # Define a threshold for important features
-    importance_threshold = 0.4
+    importance_threshold = 0.1
 
     # Filter important features based on the absolute value of coefficients
     important_features = coefficients[coefficients['Coefficient'].abs() > importance_threshold]['Feature'].tolist()
