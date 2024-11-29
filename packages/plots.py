@@ -724,7 +724,7 @@ def plot_service_risk_boxplots(df):
     return plt
 
 
-def plot_regression(X, Y, model, slope, intercept, label):
+def plot_regression(X, Y, model, slope, intercept, label, xlabel, ylabel):
     """Function to plot regression line and data points"""
     # Ensure slope and intercept are scalars
     slope_scalar = slope.item() if hasattr(slope, 'item') else slope
@@ -738,8 +738,8 @@ def plot_regression(X, Y, model, slope, intercept, label):
     
     # Add labels and legend
     plt.title(f"Regression Plot: {label}")
-    plt.xlabel("X (Independent Variable)")
-    plt.ylabel("Y (Dependent Variable)")
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
     plt.legend()
     
     # Return plot
