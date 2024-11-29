@@ -1,5 +1,7 @@
 import pandas as pd
+from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
 import numpy as np
 from packages.retrieve_stats import get_leak_types, get_count_and_probabilities
 from packages.plots import plot_regression
@@ -9,7 +11,7 @@ LEAKS_FILE = 'leak_types.txt'
 CSV_FILE_RISK = 'services\services_risk_dimensions_cluster.csv'
 CSV_SERVICE_DATA ='.\services\services.xlsx'
 FIGURES_FOLDER = 'figures\leakregression'
-VERBOSE = 1
+VERBOSE = 0
 
 def xy_regression(data, label, xlabel='x', ylabel='y'):
     """Fuction to create a regression from a dict and print results"""
@@ -35,6 +37,66 @@ def xy_regression(data, label, xlabel='x', ylabel='y'):
 
     return plot_regression(X,Y,model,slope,intercept, label, xlabel, ylabel)
 
+def multivariate_regression(df, label, xlabel, ylabel):
+    """Calculate multivariate regression with the data collected vs strength, without train-test split."""
+    # Drop non necessary columns
+    df = df.drop(columns=['sum', 'Website'])
+
+    # Split into features (X) and target (y)
+    X = df.drop(columns=['strength'])  # All Boolean predictors
+    y = df['strength']
+
+    # Train the regression model on the full dataset
+    model = LinearRegression()
+    model.fit(X, y)
+
+    # Evaluate the model on the full dataset
+    r2 = model.score(X, y)
+
+    print('\nMultivariate regression data collected vs strength')
+    print("R-squared:", r2)
+
+    # Get coefficients to understand feature importance
+    coefficients = pd.DataFrame({
+        'Feature': X.columns,
+        'Coefficient': model.coef_
+    }).sort_values(by='Coefficient', ascending=False)
+
+    print(coefficients)
+
+    # Re-run with only important coefficients
+
+    # Define a threshold for important features
+    importance_threshold = 0.4
+
+    # Filter important features based on the absolute value of coefficients
+    important_features = coefficients[coefficients['Coefficient'].abs() > importance_threshold]['Feature'].tolist()
+
+    print("\nImportant Features:", important_features)
+
+    # Filter the DataFrame to keep only important features
+    X_important = X[important_features]
+
+    # Train the regression model with important features on the full dataset
+    model_imp = LinearRegression()
+    model_imp.fit(X_important, y)
+
+    # Evaluate the reduced model
+    r2_imp = model_imp.score(X_important, y)
+
+    print("\nR-squared:", r2_imp)
+
+    # Get new coefficients
+    coefficients_imp = pd.DataFrame({
+        'Feature': X_important.columns,
+        'Coefficient': model_imp.coef_
+    }).sort_values(by='Coefficient', ascending=False)
+
+    print(coefficients_imp)
+
+    return
+
+
 
 def leakregression(leaks_file=LEAKS_FILE):
     """Function to get the data from the leaks and create a regression between password strength in the leaks and their risk value"""
@@ -50,7 +112,9 @@ def leakregression(leaks_file=LEAKS_FILE):
     # Get the services corresponding to leaks
     leaked_services = services.loc[services['Website'].isin([x for x in leak_names])]
     leaked_services.reset_index(inplace=True)
-    leaked_services_only_data = leaked_services.iloc[: ,12:30]
+    leaked_services_only_data = leaked_services.iloc[: ,13:30]
+
+    if VERBOSE > 1: print("\nleaked services only data:\n", leaked_services_only_data)
 
     # Get number of data colected by each leak
     leaked_services_only_data['sum'] = leaked_services_only_data.sum(axis=1, numeric_only=True)
@@ -96,12 +160,9 @@ def leakregression(leaks_file=LEAKS_FILE):
             # Append mean and risk to dict
             leaks_score_risk[leak] = mean, risk
             leaks_score_count[leak] = mean, count
-        else:
-            print(leak)
 
     # Add the strength to the data frame
-    leaked_services_only_data['strength'] = leaked_services_only_data['Website'].map(leaks_score_risk)
-
+    leaked_services_only_data['strength'] = leaked_services_only_data['Website'].map(lambda x: leaks_score_risk[x][0] if x in leaks_score_risk else None)
 
     # Regression with scores
     risk_regression = xy_regression(leaks_score_risk, 'Risk vs stregnth', xlabel='Password strength', ylabel='Service risk')
@@ -114,6 +175,8 @@ def leakregression(leaks_file=LEAKS_FILE):
     count_regression.close()
 
     # Multivariate regression type of data collected vs strength
-    print(leaked_services_only_data[['Website', 'strength']])
+    datacollected_regression = multivariate_regression(leaked_services_only_data, 'Data collected vs strength', xlabel='Data collected', ylabel='Strength')
+    # datacollected_regression.savefig(f"{FIGURES_FOLDER}\\datacollected_regression.png")
+    # datacollected_regression.close()
     
     return
