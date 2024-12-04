@@ -57,7 +57,7 @@ def perform_mean_comparisons(df):
     # Perform t-test
     perform_t_tests(X,y)
     # Create boxplots for all variables
-    create_boxplots_mean_comparison(df, 'strength')
+    create_boxplots_mean_comparison(df, 'strength').savefig(f"{FIGURES_FOLDER}\\boxplots_pairwise_distributions.png")
 
 
 def multivariate_regression(X,y):
@@ -240,7 +240,7 @@ def leakregression(leaks_file=LEAKS_FILE):
     # Get the services corresponding to leaks
     leaked_services = services.loc[services['Website'].isin([x for x in leak_names])]
     leaked_services.reset_index(inplace=True)
-    leaked_services_only_data = leaked_services.iloc[: ,13:30]
+    leaked_services_only_data = leaked_services.iloc[: ,13:31]
 
     if VERBOSE > 1: print("\nleaked services only data:\n", leaked_services_only_data)
 
