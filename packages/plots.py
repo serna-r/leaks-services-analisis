@@ -732,12 +732,12 @@ def plot_regression(X, Y, model, slope, intercept, label, xlabel, ylabel):
     slope_scalar = slope.item() if hasattr(slope, 'item') else slope
     intercept_scalar = intercept.item() if hasattr(intercept, 'item') else intercept
     
+    # Plot regression line
+    plt.plot(X, model.predict(X), color='red', label=f'Regression Line: y={slope_scalar:.2f}x + {intercept_scalar:.2f}')
+
     # Plot data points only for two variable regression
     if not isinstance(X, pd.DataFrame):
         plt.scatter(X, Y, color='blue', label='Data Points')
-    
-    # Plot regression line
-    plt.plot(X, model.predict(X), color='red', label=f'Regression Line: y={slope_scalar:.2f}x + {intercept_scalar:.2f}')
     
     # Add labels and legend
     plt.title(f"Regression Plot: {label}")

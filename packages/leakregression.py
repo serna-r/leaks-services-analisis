@@ -16,10 +16,13 @@ VERBOSE = 0
 
 def xy_regression(data, label, xlabel='x', ylabel='y'):
     """Fuction to create a regression from a dict and print results"""
-
     # Split data into X and Y
-    X = np.array([val[0] for val in data.values()]).reshape(-1, 1)  # Mean
-    Y = np.array([val[1] for val in data.values()])  # Score
+    if isinstance(data, dict):
+        X = np.array([val[0] for val in data.values()]).reshape(-1, 1)
+        Y = np.array([val[1] for val in data.values()])
+    if isinstance(data, pd.DataFrame):
+        X = data['min length'].to_numpy().reshape(-1, 1)
+        Y = data['strength'].to_numpy()
 
     # Fit a linear regression model
     model = LinearRegression()
@@ -48,16 +51,20 @@ def perform_mean_comparisons(df):
     X = df.drop(columns=['strength'])
     y = df['strength']
 
-    # Regression
-    multivariate_regression(X,y)
-    # Perform anova
-    perform_anova_analysis(X,y)
     # Perform man whitney
     perform_mann_whitney(X,y)
-    # Perform t-test
-    perform_t_tests(X,y)
     # Create boxplots for all variables
-    create_boxplots_mean_comparison(df, 'strength').savefig(f"{FIGURES_FOLDER}\\boxplots_pairwise_distributions.png")
+    boxplots = create_boxplots_mean_comparison(df, 'strength')
+    boxplots.savefig(f"{FIGURES_FOLDER}\\boxplots_pairwise_distributions.png")
+    boxplots.close()
+
+    # Unused tests
+    # # Regression
+    # multivariate_regression(X,y)
+    # # Perform anova
+    # perform_anova_analysis(X,y)
+    # # Perform t-test
+    # perform_t_tests(X,y)
 
 
 def multivariate_regression(X,y):
@@ -181,10 +188,13 @@ def perform_anova_analysis(X, y):
 
     # Print sorted ANOVA results and post-hoc results
     print(f"\nSorted ANOVA Results:\n{sorted_results_df}\n")
-    print("\nPost-hoc Results:")
-    for key, value in post_hoc_results.items():
-        print(f"\nVariable: {key}")
-        print(value)
+    
+    # If significance execute post-hoc
+    if not len(post_hoc_results) == 0:
+        print("\nPost-hoc Results:")
+        for key, value in post_hoc_results.items():
+            print(f"\nVariable: {key}")
+            print(value)
 
     return sorted_results_df, post_hoc_results
 
@@ -240,6 +250,7 @@ def leakregression(leaks_file=LEAKS_FILE):
     # Get the services corresponding to leaks
     leaked_services = services.loc[services['Website'].isin([x for x in leak_names])]
     leaked_services.reset_index(inplace=True)
+    leaked_services_policies = leaked_services[['Website', 'min length','min mask']]
     leaked_services_only_data = leaked_services.iloc[: ,13:31]
 
     if VERBOSE > 1: print("\nleaked services only data:\n", leaked_services_only_data)
@@ -289,8 +300,9 @@ def leakregression(leaks_file=LEAKS_FILE):
             leaks_score_risk[leak] = mean, risk
             leaks_score_count[leak] = mean, count
 
-    # Add the strength to the data frame
+    # Add the strength to the data frames
     leaked_services_only_data['strength'] = leaked_services_only_data['Website'].map(lambda x: leaks_score_risk[x][0] if x in leaks_score_risk else None)
+    leaked_services_policies['strength'] = leaked_services_only_data['Website'].map(lambda x: leaks_score_risk[x][0] if x in leaks_score_risk else None)
 
     # Regression with scores
     risk_regression = xy_regression(leaks_score_risk, 'Risk vs stregnth', xlabel='Password strength', ylabel='Service risk')
@@ -302,7 +314,13 @@ def leakregression(leaks_file=LEAKS_FILE):
     count_regression.savefig(f"{FIGURES_FOLDER}\\count_regresion.png")
     count_regression.close()
 
-    # Perform mean comparisons
+    # Perform mean comparisons for data
     perform_mean_comparisons(leaked_services_only_data)
+
+    # Comparisons for password policies
+    perform_anova_analysis(leaked_services_policies.drop(columns=['Website', 'strength']), leaked_services_policies['strength'])
+    min_length_regression = xy_regression(leaked_services_policies, 'Min length vs strenght', xlabel='Min length', ylabel='Strength')
+    min_length_regression.savefig(f"{FIGURES_FOLDER}\\minlength_regresion.png")
+    min_length_regression.close()
 
     return
