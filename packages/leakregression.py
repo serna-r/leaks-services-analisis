@@ -1,11 +1,12 @@
 import pandas as pd
-from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error, r2_score
 import numpy as np
 from packages.retrieve_stats import get_leak_types, get_count_and_probabilities
-from packages.plots import plot_regression
+from packages.plots import plot_regression, create_boxplots_mean_comparison
 from packages.servicesanalisis import get_services_info
+from scipy.stats import f_oneway, ttest_ind, mannwhitneyu, shapiro
+from statsmodels.stats.multicomp import pairwise_tukeyhsd
+
 
 LEAKS_FILE = 'leak_types.txt'
 CSV_FILE_RISK = 'services\services_risk_dimensions_cluster.csv'
@@ -37,14 +38,30 @@ def xy_regression(data, label, xlabel='x', ylabel='y'):
 
     return plot_regression(X,Y,model,slope,intercept, label, xlabel, ylabel)
 
-def multivariate_regression(df, label, xlabel, ylabel):
-    """Calculate multivariate regression with the data collected vs strength, without train-test split."""
-    # Drop non necessary columns
-    df = df.drop(columns=['sum', 'Website'])
+def perform_mean_comparisons(df):
+    """Perform, regression, anova, man whiteny, t-test and plot"""
+    # Drop non-necessary columns (if applicable)
+    if 'sum' in df.columns or 'Website' in df.columns:
+        df = df.drop(columns=['sum', 'Website'], errors='ignore')
 
     # Split into features (X) and target (y)
-    X = df.drop(columns=['strength'])  # All Boolean predictors
+    X = df.drop(columns=['strength'])
     y = df['strength']
+
+    # Regression
+    multivariate_regression(X,y)
+    # Perform anova
+    perform_anova_analysis(X,y)
+    # Perform man whitney
+    perform_mann_whitney(X,y)
+    # Perform t-test
+    perform_t_tests(X,y)
+    # Create boxplots for all variables
+    create_boxplots_mean_comparison(df, 'strength')
+
+
+def multivariate_regression(X,y):
+    """Calculate multivariate regression with the data collected vs strength, without train-test split."""
 
     # Train the regression model on the full dataset
     model = LinearRegression()
@@ -96,6 +113,117 @@ def multivariate_regression(df, label, xlabel, ylabel):
 
     return
 
+def perform_mann_whitney(X, y):
+    """Perform man whitney test"""
+    mw_test_results = {}
+
+    for column in X.columns:
+        # Ensure the variable is binary (e.g., 0 and 1)
+        unique_values = X[column].unique()
+        if len(unique_values) == 2:
+            group1 = y[X[column] == unique_values[0]]
+            group2 = y[X[column] == unique_values[1]]
+            
+            # Perform t-test
+            mw_stat, p_value = mannwhitneyu(group1, group2)
+            mw_test_results[column] = {'mw-statistic': mw_stat, 'p-value': p_value}
+        else:
+            mw_test_results[column] = {'mw-statistic': None, 'p-value': None}
+
+    # Convert results to a DataFrame
+    mw_test_results_df = pd.DataFrame(mw_test_results).T
+
+    # Sort by p-value
+    sorted_mw_test_results = mw_test_results_df.sort_values(by='p-value', ascending=True)
+
+    print(f'\nmw-test:\n{sorted_mw_test_results}')
+
+    return sorted_mw_test_results
+
+def perform_anova_analysis(X, y):
+    """
+    Perform ANOVA analysis for each independent variable in the dataframe against the dependent variable.
+
+    Parameters:
+    df (pd.DataFrame): DataFrame containing variables.
+
+    Returns:
+    pd.DataFrame: A DataFrame with F-statistics and p-values for each independent variable.
+    """
+    anova_results = {}
+    post_hoc_results = {}
+
+    for column in X.columns:
+        groups = [y[X[column] == level] for level in X[column].unique()]
+        
+        # Ensure each group has at least two samples
+        valid_groups = [group for group in groups if len(group) > 1]
+        if len(valid_groups) < 2:
+            # Skip this variable if there aren't enough groups with sufficient samples
+            anova_results[column] = {'F-statistic': None, 'p-value': None}
+            continue
+
+        # Perform ANOVA
+        f_stat, p_value = f_oneway(*valid_groups)
+        anova_results[column] = {'F-statistic': f_stat, 'p-value': p_value}
+
+        # Perform post-hoc test if ANOVA is significant
+        if p_value < 0.05:
+            try:
+                tukey = pairwise_tukeyhsd(endog=y, groups=X[column], alpha=0.05)
+                post_hoc_results[column] = tukey.summary()
+            except Exception as e:
+                post_hoc_results[column] = f"Error: {str(e)}"
+
+    # Create a DataFrame for ANOVA results
+    results_df = pd.DataFrame(anova_results).T
+    sorted_results_df = results_df.sort_values(by='p-value', ascending=True)
+
+    # Print sorted ANOVA results and post-hoc results
+    print(f"\nSorted ANOVA Results:\n{sorted_results_df}\n")
+    print("\nPost-hoc Results:")
+    for key, value in post_hoc_results.items():
+        print(f"\nVariable: {key}")
+        print(value)
+
+    return sorted_results_df, post_hoc_results
+
+def perform_t_tests(X,y):
+    """
+    Perform t-tests for each independent variable in the dataframe against the dependent variable.
+
+    Parameters:
+    df (pd.DataFrame): DataFrame containing variables.
+    dependent_variable (str): The name of the dependent variable column.
+
+    Returns:
+    pd.DataFrame: A DataFrame with t-statistics and p-values for each independent variable.
+    """
+
+    t_test_results = {}
+
+    for column in X.columns:
+        # Ensure the variable is binary (e.g., 0 and 1)
+        unique_values = X[column].unique()
+        if len(unique_values) == 2:
+            group1 = y[X[column] == unique_values[0]]
+            group2 = y[X[column] == unique_values[1]]
+            
+            # Perform t-test
+            t_stat, p_value = ttest_ind(group1, group2, equal_var=False)  # Welch's t-test for unequal variances
+            t_test_results[column] = {'t-statistic': t_stat, 'p-value': p_value}
+        else:
+            t_test_results[column] = {'t-statistic': None, 'p-value': None}
+
+    # Convert results to a DataFrame
+    t_test_results_df = pd.DataFrame(t_test_results).T
+
+    # Sort by p-value
+    sorted_t_test_results = t_test_results_df.sort_values(by='p-value', ascending=True)
+
+    print(f'\nT-test:\n{sorted_t_test_results}')
+
+    return sorted_t_test_results
 
 
 def leakregression(leaks_file=LEAKS_FILE):
@@ -174,9 +302,7 @@ def leakregression(leaks_file=LEAKS_FILE):
     count_regression.savefig(f"{FIGURES_FOLDER}\\count_regresion.png")
     count_regression.close()
 
-    # Multivariate regression type of data collected vs strength
-    datacollected_regression = multivariate_regression(leaked_services_only_data, 'Data collected vs strength', xlabel='Data collected', ylabel='Strength')
-    # datacollected_regression.savefig(f"{FIGURES_FOLDER}\\datacollected_regression.png")
-    # datacollected_regression.close()
-    
+    # Perform mean comparisons
+    perform_mean_comparisons(leaked_services_only_data)
+
     return

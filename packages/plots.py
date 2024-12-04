@@ -7,6 +7,8 @@ from matplotlib.colors import to_rgba
 import matplotlib.patches as mpatches
 from datetime import datetime
 from math import pi
+import math
+import seaborn as sns
 
 # Get diferent colors for each type of service
 def get_colors(leak_types):
@@ -778,5 +780,41 @@ def boxplot_nist_compliance(df):
 
     # Show the plot
     plt.tight_layout()
+
+    return plt
+
+def create_boxplots_mean_comparison(df, dependent_variable):
+    """
+    Create boxplots showing the distribution of the dependent variable grouped by each independent variable,
+    and display them in a single view.
+
+    Parameters:
+    df (pd.DataFrame): DataFrame containing the data.
+    dependent_variable (str): The name of the dependent variable column.
+
+    Returns:
+    None: Displays the boxplots for each independent variable in a single view.
+    """
+    independent_variables = [col for col in df.columns if col != dependent_variable]
+    n_vars = len(independent_variables)
+
+    # Calculate the number of rows and columns for subplots
+    cols = 3  # Number of columns for the layout
+    rows = math.ceil(n_vars / cols)
+
+    fig, axes = plt.subplots(rows, cols, figsize=(cols * 5, rows * 5), constrained_layout=True)
+
+    # Flatten axes array if multiple rows
+    axes = axes.flatten() if rows > 1 else [axes]
+
+    for idx, column in enumerate(independent_variables):
+        sns.boxplot(ax=axes[idx], x=df[column], y=df[dependent_variable])
+        axes[idx].set_title(f'{dependent_variable} grouped by {column}')
+        axes[idx].set_xlabel(column)
+        axes[idx].set_ylabel(dependent_variable)
+
+    # Remove unused axes if any
+    for ax in axes[len(independent_variables):]:
+        ax.remove()
 
     return plt
