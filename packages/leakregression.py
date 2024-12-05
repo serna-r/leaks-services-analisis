@@ -4,7 +4,7 @@ import numpy as np
 from packages.retrieve_stats import get_leak_types, get_count_and_probabilities
 from packages.plots import plot_regression, create_boxplots_mean_comparison
 from packages.servicesanalisis import get_services_info
-from scipy.stats import f_oneway, ttest_ind, mannwhitneyu, shapiro
+from scipy.stats import f_oneway, ttest_ind, mannwhitneyu, kruskal
 from statsmodels.stats.multicomp import pairwise_tukeyhsd
 
 
@@ -146,6 +146,17 @@ def perform_mann_whitney(X, y):
     print(f'\nmw-test:\n{sorted_mw_test_results}')
 
     return sorted_mw_test_results
+
+def perform_kruskal_wallis(df):
+    # Prueba Kruskal-Wallis con grupos basados en 'min_length'
+    groups_min_length = [df[df["min length"] == length]["strength"] for length in df["min length"].unique()]
+    kruskal_min_length = kruskal(*groups_min_length)
+
+    # Prueba Kruskal-Wallis con grupos basados en 'min_mask'
+    groups_min_mask = [df[df["min mask"] == mask]["strength"] for mask in df["min mask"].unique()]
+    kruskal_min_mask = kruskal(*groups_min_mask)
+
+    print(f"Kruskal wallis test: \nmin length: \n{kruskal_min_length} \nmin mask: \n{kruskal_min_mask}")
 
 def perform_anova_analysis(X, y):
     """
@@ -319,7 +330,8 @@ def leakregression(leaks_file=LEAKS_FILE):
 
     # Comparisons for password policies
     perform_anova_analysis(leaked_services_policies.drop(columns=['Website', 'strength']), leaked_services_policies['strength'])
-    min_length_regression = xy_regression(leaked_services_policies, 'Min length vs strenght', xlabel='Min length', ylabel='Strength')
+    perform_kruskal_wallis(leaked_services_policies)
+    min_length_regression = xy_regression(leaked_services_policies, '\nMin length vs strenght', xlabel='Min length', ylabel='Strength')
     min_length_regression.savefig(f"{FIGURES_FOLDER}\\minlength_regresion.png")
     min_length_regression.close()
 
