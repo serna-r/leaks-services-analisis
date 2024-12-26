@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.stats import entropy
+from scipy.stats import entropy, kruskal
 import pandas as pd
 import warnings
 from packages.retrieve_stats import get_count_and_probabilities, get_mask_distribution, get_score_and_length, get_leak_types
@@ -16,7 +16,7 @@ FIGURES_FOLDER = 'figures/leaks/'
 # Boolean to choose analysis by length
 LENGTH = False
 
-def compute_kl_matrix(distributions, names):  
+def compute_kl_matrix(distributions, names): 
     num_distributions = len(distributions)
     kl_matrix = np.zeros((num_distributions, num_distributions))
 
@@ -48,6 +48,19 @@ def compute_kl_matrix_dfs(distributions, names, dropcolumn):
         kl_matrices.append([(i+5),compute_kl_matrix(length_dist, names)])
 
     return kl_matrices
+
+def kruskal_wallis_distance(distributions, names):
+
+    # Realizar el test de Kruskal-Wallis
+    h_stat, p_value = kruskal(*distributions)
+    
+    # Resultado
+    result = {
+        "H_statistic": h_stat,
+        "p_value": p_value,
+        "groups": names
+    }
+    return result
 
 
 def get_distribution_comparison(leaks_file='leak_types.txt'):
@@ -98,6 +111,12 @@ def get_distribution_comparison(leaks_file='leak_types.txt'):
     # Get the kl matrix for score
     kl_df_score = compute_kl_matrix(score_distributions, leak_names)
     kl_df_score.to_csv('./leaks/kl_df_score.csv')
+
+    # Get kruskal wallis
+    kw_result = kruskal_wallis_distance(score_distributions, leak_names)
+    print(f"Kruskal value test for distributions:\nH stat: {kw_result['H_statistic']:.4f}")
+    print(f"P value: {kw_result['p_value']:.4e}")
+    print(f"Groups: {', '.join(kw_result['groups'])}")
 
     # Get the colors for the plots
     colors_leaks, colors_categories = get_colors(leak_types)
