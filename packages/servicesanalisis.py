@@ -186,6 +186,7 @@ def service_analisis(file):
     services = get_services_info(file)
     services_only_data = services.iloc[: ,12:30]
     services_only_data[['Type', 'Website']] = services[['Type', 'Website']].copy()
+    print(services_only_data.loc[services_only_data['Type']=='NetworkOperations', :])
 
     print(f"\nServices columns: {services.columns.to_list()} \n\nServices only data columns: {services_only_data.columns.to_list()}\n")
 
