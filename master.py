@@ -239,6 +239,7 @@ def print_help():
     print("-l --latex: Make a latex file in the latex folder with important data (file leak_types.txt)")
     print("-c --cluster: Execute the cluster module")
     print("-sa --serviceanalisis: execute service data analisis from the data colected in the excel document (./services/services.xlsx)")
+    print("-lr --leakregression: execute the regressions and statistical tests to find relationships with password strength")
     print("-h --help: Display this help menu")
     print("No option: Display this help menu")
 
