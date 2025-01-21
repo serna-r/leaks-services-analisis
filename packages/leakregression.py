@@ -262,7 +262,7 @@ def leakregression(leaks_file=LEAKS_FILE):
     leaked_services = services.loc[services['Website'].isin([x for x in leak_names])]
     leaked_services.reset_index(inplace=True)
     leaked_services_policies = leaked_services[['Website', 'min length','min mask']]
-    leaked_services_only_data = leaked_services.iloc[: ,13:31]
+    leaked_services_only_data = leaked_services.iloc[: ,8:31]
 
     if VERBOSE > 1: print("\nleaked services only data:\n", leaked_services_only_data)
 
