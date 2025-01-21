@@ -4,3 +4,6 @@ zxcvbn==4.4.28
 matplotlib==3.9.2
 scipy==1.14.1
 openpyxl==3.1.5
+scikit-learn==1.6.1
+seaborn==0.13.2
+statsmodels==0.14.4
