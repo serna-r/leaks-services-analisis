@@ -406,9 +406,8 @@ def boxwhiskers_from_kl_matrices(kl_matrices, labels, colors=None):
     # Create boxplot
     plt.figure(figsize=(8, 6))
     plt.boxplot(values, showmeans='True')
-    plt.title('Box and Whiskers Plot (Ignoring Diagonal)')
-    plt.ylabel('Values')
-    plt.xticks(np.array([i for i in range(len(labels))]) + 1 , labels, rotation=45, ha='right', fontsize=8)
+    plt.ylabel('Values', fontsize=18)
+    plt.xticks(np.arange(len(labels)) + 1, labels, rotation=45, ha='right', fontsize=16)
     plt.grid(True)
 
     # Plot points for visualization
@@ -416,6 +415,8 @@ def boxwhiskers_from_kl_matrices(kl_matrices, labels, colors=None):
         y = values[i]
         x = np.random.normal(1+i, 0.04, size=len(y))
         plt.plot(x, y, '.', alpha=0.5, color=colors[i] if colors else None)
+
+    plt.tight_layout()
     
     return plt
 
