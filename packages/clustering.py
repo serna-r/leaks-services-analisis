@@ -68,6 +68,7 @@ def get_elbow_kmeans(leak_names, leak_probabilities):
         sse.append(kmeans.inertia_)
 
     plt.style.use("fivethirtyeight")
+    plt.figure(figsize=(16, 8))   # make figure larger
     plt.plot(range(2, number_leaks), sse)
     plt.xticks(range(2, number_leaks))
     plt.xlabel("Number of Clusters")
