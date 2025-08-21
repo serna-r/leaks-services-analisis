@@ -62,6 +62,51 @@ def kruskal_wallis_distance(distributions, names):
     }
     return result
 
+from scipy.stats import kruskal
+import numpy as np
+from collections import defaultdict
+from datetime import datetime
+
+def kruskal_wallis_distance(distributions, names):
+    # Perform the Kruskal-Wallis test
+    h_stat, p_value = kruskal(*distributions)
+
+    # Return the results
+    result = {
+        "H_statistic": h_stat,
+        "p_value": p_value,
+        "groups": names
+    }
+    return result
+
+def kruskall_years(dates, score_distributions):
+    # Convert dates to year, handle "Unknown" entries
+    years = []
+    for date in dates:
+        try:
+            year = datetime.strptime(date, "%d/%m/%Y").year
+        except ValueError:
+            year = "Unknown"
+        years.append(year)
+
+    # Group distributions by year
+    year_groups = defaultdict(list)
+    for year, scores in zip(years, score_distributions):
+        if year != "Unknown":
+            year_groups[year].append(scores)
+
+    # Compute mean distributions for each year
+    mean_distributions = {
+        year: np.mean(distributions, axis=0) for year, distributions in year_groups.items()
+    }
+
+    # Prepare data for Kruskal-Wallis test
+    test_years = list(mean_distributions.keys())
+    test_distributions = list(mean_distributions.values())
+
+    # Use the provided Kruskal-Wallis function
+    result = kruskal_wallis_distance(test_distributions, test_years)
+    return result
 
 def get_distribution_comparison(leaks_file='leak_types.txt'):
     # Get leaks with categories
@@ -108,15 +153,28 @@ def get_distribution_comparison(leaks_file='leak_types.txt'):
         score_distributions.append(probability)
         mask_dataframes.append(mask_df)
     
+    # Obtain mean scores
+    # Convert to NumPy array for easier manipulation
+    score_distributions = np.array(score_distributions)
+    # Calculate the mean for each score (column)
+    mean_scores = score_distributions.mean(axis=0)
+    print("Mean scores:", mean_scores)
+
     # Get the kl matrix for score
     kl_df_score = compute_kl_matrix(score_distributions, leak_names)
     kl_df_score.to_csv('./leaks/kl_df_score.csv')
 
-    # Get kruskal wallis
+    # Get kruskal wallis for individual distributions
     kw_result = kruskal_wallis_distance(score_distributions, leak_names)
     print(f"Kruskal value test for distributions:\nH stat: {kw_result['H_statistic']:.4f}")
     print(f"P value: {kw_result['p_value']:.4e}")
     print(f"Groups: {', '.join(kw_result['groups'])}")
+
+    # Get kruskal for mean years
+    kw_result_years = kruskall_years(dates_list, score_distributions)
+    print(f"Kruskal value test for distributions by year:\nH stat: {kw_result_years['H_statistic']:.4f}")
+    print(f"P value: {kw_result_years['p_value']:.4e}")
+    print(f"Groups: {', '.join(map(str, kw_result_years['groups']))}")
 
     # Get the colors for the plots
     colors_leaks, colors_categories = get_colors(leak_types)
