@@ -72,7 +72,7 @@ def get_elbow_kmeans(leak_names, leak_probabilities):
     plt.plot(range(2, number_leaks), sse)
     plt.xticks(range(2, number_leaks))
     plt.xlabel("Number of Clusters")
-    plt.ylabel("SSE")
+    plt.ylabel("SSW")
     return number_leaks, plt
 
 def get_silhouette_kmeans(leak_names, leak_probabilities):

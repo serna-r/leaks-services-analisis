@@ -442,7 +442,7 @@ def random_scatterplot_klmatrices(kl_matrices, labels, colors = None):
     
     return plt
 
-def plot_kmeans(data, sse, default_sort = True):
+def plot_kmeans(data, sse, default_sort = False):
     # Sort data by category
     if default_sort: data_sorted = sorted(data, key=lambda x: x[0][0])
     else: data_sorted = data
@@ -474,7 +474,7 @@ def plot_kmeans(data, sse, default_sort = True):
     # Add labels and title
     ax.set_xlabel(f'Services, SSE = {sse}')
     ax.set_ylabel('Distribution')
-    ax.set_title('Distribution of Categories Across Services (Ordered by K means label)')
+    ax.set_title('Distribution of Categories Across Services (Ordered by category)')
 
     # Show the plot
     plt.xticks(rotation=90)
